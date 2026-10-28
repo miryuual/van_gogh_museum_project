@@ -1,0 +1,527 @@
+/* HOME CSS*/
+
+
+body{
+    margin: 0;
+    padding: 0;
+    min-height: 0;
+
+    background-image: url("Material/Vangogh-Museum Entrance-D.jpg");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    font-weight: 600;
+}
+
+a{
+    text-decoration: none;
+    color: black;
+}
+a:hover{
+    background-color: #f8df50;
+    color: #000000;
+    transition: background-color 0.3s ease;
+}
+
+/* TOP NAVIGATOR */
+header{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+    background-color: white;
+
+    box-sizing: border-box;
+
+    padding: 0 30px;
+
+    position: sticky;
+    z-index: 1000;
+    top: 0;
+
+    border-bottom: 1px solid #000000;
+}
+
+
+
+.identity{
+    font-family: "Outfit", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    margin: 0;
+
+    font-size: 13px;
+}
+
+
+.search{
+    display: flex;
+    padding: 8px 12px;
+    margin-left: 40px;
+}
+.search input{
+    display: flex;
+    width: 950px;
+    height: 35px;
+    padding: 0 3px;
+    margin: 0;
+    
+    border: 1px solid #000000;
+}
+
+.search button{
+    background-color: #000000;
+    color: white;
+    padding: 0 7px;
+    box-shadow: none;
+    border: 0px solid;
+    outline: none;
+    margin: 0;
+    border: 1px solid #000000;
+}
+
+header h1{
+    margin: 0;
+
+}
+
+/*LOGIN*/
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.user-dropdown summary {
+    list-style: none;
+    cursor: pointer;
+
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    height: 100%;
+}
+.user-menu {
+    position: absolute;
+    top: 100%;
+
+    margin: 0;
+
+    right: 0;
+    background-color: white;
+    border: 2px solid #000000;
+
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+    z-index: 1000;
+
+    width: 150px;
+}
+
+.user-menu a {
+    display: block;
+    padding: 10px;
+    color: black;
+    text-decoration: none;
+}
+
+.user-dropdown-summary{
+    font-size: 18px;
+}
+
+/*MAIN lAYOUT*/
+
+.body-layout {
+    display: flex;
+    align-items: flex-start;
+
+    width: 95%;
+    margin: 20px auto;
+
+    gap: 15px;
+
+}
+
+/* SIDE NAVIGATOR */
+
+.sidebar {
+    width: 200px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+
+    top: 80px;
+
+    align-self: flex-start;
+}
+
+.navigasi2, .navigasi {
+
+    width: 200px;
+    align-self: flex-start;
+
+    background-color: white;
+    border-radius: 7px;
+
+    overflow: hidden;
+}
+
+
+.sidebar-logo{
+    display: block;
+    width: 200px;
+    height: auto;
+    margin: 20px auto 20px;
+}
+
+aside h3{
+    margin: 0;
+    padding: 12px 20px;
+    background-color: #F9D71C;
+    border-top: 1px solid #a79fb9;
+    border-bottom: 1px solid #a79fb9;
+
+}
+aside a{
+    display: block;
+    padding: 8px 20px;
+    color: black;
+    text-decoration: none;
+
+}
+
+
+/*MAIN CONTENT*/
+main{
+    flex: 1;
+    min-height: 1000px;
+    background-color: #ffffff;
+    border-radius: 7px;
+    padding-left: 30px;
+    padding-top: 30px;
+
+    box-sizing: border-box;
+
+}
+.home-content{
+    color: #fdf748;
+    border: 1px solid #F9D71C;
+    display: flex;
+    justify-content: center;
+    border-radius: 2px;
+    padding-left: 35px;
+
+    background-image: 
+    linear-gradient(to bottom, rgba(0, 36, 122, 0.2), rgba(0, 36, 122, 0.8)), url("Material/Starry_Night_Over_the_Rhone.jpg");
+    background-size: cover;
+    background-position: center;
+
+    margin-bottom: 30px;
+}
+
+.home-content img{
+    width: 670px;
+    margin-top: 0;
+    margin-right: 0;
+
+    object-fit: cover;
+}
+.starry-night-over-the-rhone img{
+    width: 500px;
+    height: 650px;
+    overflow: hidden;
+}
+
+.home-content a{
+    border: 1px solid #003756;
+}
+.home-content p{
+    font-size: 16px;
+    font-weight: 300;
+    padding-right: 80px;
+    text-align: justify;
+}
+
+.main-head h2{
+    font-size: 80px;
+    font-weight: 500;
+    width: 95%;
+    margin: 0;
+
+    padding-top: 150px;
+    padding-bottom: 10px;
+    line-height: 1;
+}
+.btn{
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #000000;
+    color: white;
+
+    text-decoration: none;
+    border-radius: 2px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.The-Pink-Peach-Tree p{
+    font-style: italic;
+    justify-self: center;
+}
+
+
+
+/*BIOGRAPHY*/
+.home-bio{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+
+
+    margin-top: 70px;
+    margin-bottom: 20px;
+}
+.home-bio img{
+    width: 300px;
+    height: auto;
+    border-radius: 2px;
+    margin-left: 50px;
+
+    padding-top: 0;
+    margin-top: 0;
+}
+
+.bio-portrait p{
+    font-weight: 300;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.bio-content h4{
+    font-size: 50px;
+    font-weight: 500;
+    margin: 0;
+    padding-left: 35px;
+}
+.bio-content p{
+    font-size: 17px;
+    font-weight: 400;
+    padding-right: 130px;
+    padding-left: 45px;
+    text-align: justify;
+}
+.btna{
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #000000;
+    color: white;
+
+    text-decoration: none;
+    border-radius: 2px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+
+
+    margin-top: 35px;
+    margin-left: 45px;
+    margin-bottom: 30px;
+
+}
+
+/*RECOMENDED COLLECTION*/
+
+
+
+.featured-collection{
+    margin-top: 60px;
+    width: 100%;
+    padding: 20px 0;
+    padding-right: 35px;
+    box-sizing: border-box;
+    margin-bottom: 70px;
+}
+.featured-collection h5{
+    font-size: 45px;
+    font-weight: 500;
+
+    text-align: center;
+    padding-left: 35px;
+    margin:0;
+    padding-bottom: 19px;
+}
+.collection-scroll{
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 20px;
+    padding: 0 0 10px 0;
+}
+
+.painting-card{
+    position: relative;
+    flex: 0 0 auto;
+    height: 300px;
+    overflow: hidden;
+    color: #000000;
+    text-decoration: none;
+}
+
+.painting-card img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+    display: block;
+}
+.painting-card img:hover{
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.painting-info{
+    position: absolute;
+    bottom: 25px;
+    left: 30px;
+    color: #ffffff;
+}
+.painting-info h6{
+   margin: 0 0 5px 0;
+   font-size: 18px;
+
+}
+
+.painting-info p{
+    margin: 0;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    font-weight: 300;
+}
+
+/*NEWS*/
+
+.news-content{
+    padding-top: 15px;
+    margin-top: 5px;
+    padding-bottom: 30px;
+
+    margin-bottom: 40px;
+    background-color: #F2C94C;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+
+.news-content h4{
+    text-align: center;
+    font-size: 50px;
+    font-weight: 500;
+    margin: 0 0 20px 0;
+}
+
+.news-container {
+    display: flex;
+    gap: 16px;
+}
+
+
+.news-card-image{
+    width: 350px;
+    height: 230px;
+    border-radius: 2px;
+
+    object-fit: cover;
+    overflow: hidden;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    box-sizing: border-box;
+}
+
+.news-image span{
+    font-size: 12px;
+}
+
+.news-card-image img{
+    width: 100%;
+    height: auto;
+}
+.news-card-image img:hover{
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+
+.news-card h5{
+    font-size: 18px;
+    font-weight: 500;
+    margin: 10px 0 5px 0;
+    border-bottom: 1px solid #000000;
+    padding-bottom: 5px;
+}
+
+.news-card p{
+    font-size: 12px;
+    line-height: 1;
+    margin: 0;
+    color: rgba(0, 0, 0, 0.5);
+    margin-bottom: 10px;
+}
+
+.news-card:hover{
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+
+}
+
+.news-btn{
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #000000;
+    color: white;
+
+    text-decoration: none;
+    border-radius: 2px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    
+    text-align: center;
+
+    display: block;
+    margin-left: 0;
+    width: fit-content;
+    margin-top: 20px;
+    margin-left: auto;
+    padding: 8px 15px;
+}
+
+
+/*FOOTER*/
+footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    height: 200px;
+    padding-left: 250px;
+    padding-right: 45px;
+    background-color: rgba(242, 201, 76, 0.9);
+}
+.footer-left p, .footer-middle p, .footer-right p{
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    font-weight: 300;
+}
+.footer-left-bottom p{
+   margin-top: 20px;
+}
+

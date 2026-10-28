@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home-Van Gogh Museum</title>
+
+    <!--LINK FONT-->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+    <!--CSS-->
+        <link rel="stylesheet" href="General_CSS - Copy.css">
+
+
+        <style>
+
+            .main-head{
+                font-size: 90px;
+                background-color: rgba(22, 15, 15, 0.8);
+
+                text-align: center;
+
+                padding: 0;
+                
+            }
+
+            h4{
+                font-size: 30px;
+            }
+
+            h5{
+                font-size: 27px;
+                margin-bottom: 0;
+            }
+            .main-p{
+                font-weight: 400;
+                font-size: 20px;
+
+            }
+            .booking{
+                margin-left: 200px;
+                margin-right: 220px;
+
+                border: 1px solid black;
+
+                padding-left: 40px;
+                padding-right: 40px;
+
+                padding-bottom: 20px;
+
+                background-color: rgba(22, 15, 15, 0.9);
+                color: white;
+                margin-top: 20px;
+
+                font-weight: 300;
+                
+                
+
+            }
+
+            main{
+                background-image: url("Material/Vangogh-Museum Entrance-D.jpg");
+                color: rgb(252, 252, 252);
+                flex: 1;
+                background-size: cover;
+                background-position: center;
+                min-width: 0;
+                min-height: 600px;
+
+                background-color: white;
+
+                border-radius: 7px;
+
+                padding: 30px;
+
+                margin-top: 10px;
+            }
+
+            button{
+                display: inline-block;
+                margin-top: 10px;
+                padding: 10px 20px;
+
+                background-color: #F9D71C;
+                color: rgb(5, 0, 0);
+
+                font-weight: 700;
+
+                text-decoration: none;
+            }
+
+            .btn-b{
+                display: flex;
+                
+            }
+
+            .btn-c{
+                margin-left: 400px;
+
+            }
+
+            .back-button:hover{
+                background-color: #000000;
+                color: #f8df50;
+                transition: background-color 0.3s ease;
+            }
+
+            /*back button*/
+            .back-button{
+                display: inline-block;
+                margin-top: 10px;
+                padding: 10px 20px;
+                background-color: #F9D71C;
+
+                border: 1px solid #e1ddc4;
+                color: rgb(0, 0, 0);
+
+                font-weight: 600;
+                
+                text-decoration: none;
+                border-radius: 0px;
+            }
+
+            th, td, table{
+                border-bottom: 1px solid rgb(255, 255, 255);
+            }
+
+            .first-table{
+                margin-top: 50px;
+            }
+
+        </style>
+
+</head>
+
+
+<body>
+    <header>
+       
+        <section class="identity">
+            <a href="index.php">
+                <h1>Van Gogh Museum</h1>
+            </a>
+        </section>
+        
+        <form action="" method="get" class="search">
+            <input type="text" placeholder="Search Van Gogh Museum">
+            <button type="submit">Search</button>
+        </form>
+        
+            <div class="user-dropdown">
+
+                <details>
+
+                    <summary class="user-dropdown-summary">
+                        Anonymous
+                        <span>▼</span>
+                    </summary>
+
+                    <div class="user-menu">
+
+                        <a href="register.php">
+                            Create account
+                        </a>
+                            <hr>
+                        <a href="login.php">
+                            Log in
+                        </a>
+
+                    </div>
+
+                </details>
+
+            </div>
+
+
+    </header>
+    
+    <!--MAIN BODY-->
+    <div class="body-layout">
+
+        <!--NAViGASI-->
+        <div class="sidebar">
+            <aside class="navigasi">
+                        <img src="Material/Logo_-_Van_Gogh_Museum.png" alt="Van Gogh Museum Logo" class="sidebar-logo" >
+                    
+                <h3>Navigation </h3>
+
+                <a href="index.php">Home</a>
+                <a href="collection.php">Collection</a>
+                <a href="biography.php">Biography</a>
+                <a href="news.php">News</a>
+                <a href="About us.php">About Us</a>
+                <a href="privacy-policy.php">Privacy Policy</a>
+
+                <h3>Tiket & Visit</h3>
+                <a href="ticket-ticketprice.php">Ticket & Ticket Prices</a>
+                <a href="addres-opening-hours.php">Address & Opening Hours</a>
+
+
+            </aside>
+            <aside class="navigasi2">
+                    
+                <h3>Related Website</h3>
+
+                <a href="https://www.vangoghmuseum.nl/en">Ofiicial Van Gogh Museum</a>
+                <a href="https://www.vincent-van-gogh-gallery.org/">Vincent Van Gogh Gallery</a>
+                <a href="https://www.vggallery.com/">VGGallery</a>
+                <a href="https://www.rijksmuseum.nl/en">Rijksmuseum</a>
+                <a href="https://www.musee-orsay.fr/en">Musée d'Orsay</a>
+                <a href="https://www.louvre.fr/en">The Louvre Museum</a>
+            </aside>
+        </div>
+
+
+    <!--main content-->
+        <main>
+            <h2 class="main-head">Booking Status</h2>
+
+        <div class="booking">
+
+            <section>
+                <h4>Booking Successful!</h4>
+
+                <p>
+                    Thank you for booking your visit to the Van Gogh Museum.
+                </p>
+
+                <p>
+                    Your booking has been successfully confirmed.
+                </p>
+            </section>
+
+            <hr>
+
+            <section>
+                <h3>Booking Details</h5>
+
+                <table>
+                    <tr>
+                        <th>Booking Number</th>
+                        <td>VGM-20261010-001</td>
+                    </tr>
+
+                    <tr>
+                        <th>Visitor Name</th>
+                        <td>John Doe</td>
+                    </tr>
+
+                    <tr>
+                        <th>Visit Date</th>
+                        <td>10 October 2026</td>
+                    </tr>
+
+                    <tr>
+                        <th>Visit Time</th>
+                        <td>10:00 AM</td>
+                    </tr>
+
+                    <tr>
+                        <th>Ticket</th>
+                        <td>Adult × 2</td>
+                    </tr>
+
+                    <tr>
+                        <th>Total Price</th>
+                        <td>€48</td>
+                    </tr>
+                </table>
+            </section>
+
+            <br>
+
+            <section>
+                <h5>Important Information</h5>
+
+                <ul>
+                    <li>Please arrive at the museum according to your selected time.</li>
+                    <li>Keep your booking confirmation for your visit.</li>
+                    <li>Check your email for further booking information.</li>
+                </ul>
+            </section>
+
+            <br>
+
+            <section>
+                <h5>What would you like to do next?</h5>
+
+                <a href="index.php" style="color: #F9D71C;">
+                    Back to Home
+                </a>
+
+                <br><br>
+
+                <a href="collection.php" style="color: #F9D71C;">
+                    Explore Collection
+                </a>
+            </section>
+        </div>
+
+        </main>
+
+    </div>
+
+
+<!--FOOTERR-->
+<footer>
+    <div class="footer-left">
+        
+        <p> <b>Van Gogh Museum </b> </p>
+        <p>Museumplein 6, 1071 DJ Amsterdam, Netherlands</p>
+
+        <section class="footer-left-bottom">
+        <p><b>&copy; Van Gogh Museum, Amsterdam</b></p>
+        </section>
+        
+        <p>Collection: Vincent van Gogh Foundation</p>
+        
+    </div>
+
+    <div class="footer-middle">
+        <p><b>Contact</b></p>
+        <P>+31 (0)20 570 5200</P>
+        <p>info@vangoghmuseum.nl</p>
+        <p>www.vangoghmuseum.nl</p>
+    </div>
+
+    <div class="footer-right">
+        <p><b>Website Project</b></p>
+        <p>Dibuat oleh: Dinda Nur Alisa Putri | NIM: 250911718464 </p>
+        <p>&copy; 2026 Diploma Vokasi Perpustakaan Digital</p>
+        <p>Universitas Negeri Malang</p>
+    </div>
+
+</footer>
+    
+</body>
+</html>
