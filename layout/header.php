@@ -29,50 +29,72 @@ if (session_status() === PHP_SESSION_NONE) {
         </a>
     </section>
 
-    <form action="" method="get" class="search">
+    <form action="search.php" method="get" class="search">
         <input
             type="text"
             name="search"
             placeholder="Search Van Gogh Museum"
+            value="<?= htmlspecialchars($_GET['search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+            required
         >
         <button type="submit">Search</button>
     </form>
 
     <div class="user-dropdown">
-
         <details>
             <summary class="user-dropdown-summary">
 
-                <?php
-                echo htmlspecialchars(
-                    $_SESSION['username'] ?? 'Anonymous',
-                    ENT_QUOTES,
-                    'UTF-8'
-                );
-                ?>
+                <?php if (isset($_SESSION['user_id'])): ?>
 
-                <span>▼</span>
+                    <?php
+                    $profilePicture = 'Material/default-profile.png';
+
+                    if (!empty($_SESSION['profile_picture'])) {
+                        $profilePicture = $_SESSION['profile_picture'];
+                    }
+                    ?>
+
+                    <img
+                        src="<?php echo htmlspecialchars($profilePicture, ENT_QUOTES, 'UTF-8'); ?>"
+                        alt="Foto profil"
+                        class="topbar-avatar"
+                    >
+
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION['username'] ?? 'Pengguna',
+                        ENT_QUOTES,
+                        'UTF-8'
+                    );
+                    ?>
+
+                <?php else: ?>
+
+                    <span>Anonymous</span>
+
+                <?php endif; ?>
+
+                <span class="dropdown-arrow">▼</span>
             </summary>
 
             <div class="user-menu">
 
-                <?php if (isset($_SESSION['username'])): ?>
+                <?php if (isset($_SESSION['user_id'])): ?>
 
+                    <a href="dashboard-user.php?tab=account">Profil Saya</a>
                     <a href="log-out.php">Log out</a>
 
                 <?php else: ?>
 
                     <a href="register-page.php">Register</a>
-
                     <hr>
-
                     <a href="login.php">Log in</a>
 
                 <?php endif; ?>
 
             </div>
         </details>
-
     </div>
+
 
 </header>

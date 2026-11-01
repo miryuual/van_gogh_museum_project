@@ -1,6 +1,21 @@
-<?php
-    session_start();
-    include 'layout/header.php';?>
+
+
+        <?php
+        session_start();
+
+        include 'koneksi.php';
+        include 'layout/header.php';
+
+        // Mengambil berita yang sudah dipublikasikan
+        $query = "SELECT * FROM berita
+                WHERE status = 'Dipublikasikan'
+                ORDER BY tanggal_berita DESC";
+
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+
+        $berita = $stmt->fetchAll();
+        ?>
 
     <style>
         .main-head{
@@ -85,47 +100,52 @@
         <main>
             <h2 class="main-head">Museum News</h2>
 
-                    <div class="news-container">
+                <div class="news-container">
 
-                        <article class="news-card">
-                            <a href="news-details.php">
-                                <div class="news-card-image">
-                                    <img src="Material/Sketch_of_Starry_Night_Over_the_Rhone,_enclosed_in_a_letter_from_Vincent_van_Gogh_to_Eugene_Boch.jpg" alt="Van Gogh Exhibition">
-                              </a>
-                         
-                                </div>
-                                    <h5 class="read-more-link"><a href="news-details.php"><strong class="read-more">[DD/MM/YY] News Headline</strong></a></h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.  Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc.</p>
-                                    <p class="read-more-link"><a href="news-details.php"><strong class="read-more">Read More →</strong></a></p>
+                    <?php if (!empty($berita)): ?>
+
+                        <?php foreach ($berita as $item): ?>
+
+                            <article class="news-card">
+
+                                <a href="news-details.php?id=<?= (int) $item['id_berita'] ?>">
+                                    <div class="news-card-image">
+                                        <img
+                                            src="<?= htmlspecialchars($item['gambar_utama']) ?>"
+                                            alt="<?= htmlspecialchars($item['judul_berita']) ?>"
+>
+                                    </div>
+                                </a>
+
+                                <h5 class="read-more-link">
+                                    <a href="news-details.php?id=<?= (int) $item['id_berita'] ?>">
+                                        <strong class="read-more">
+                                            <?= htmlspecialchars($item['judul_berita']) ?>
+                                        </strong>
+                                    </a>
+                                </h5>
+
+                                <p>
+                                    <?= htmlspecialchars($item['ringkasan']) ?>
+                                </p>
+
+                                <p class="read-more-link">
+                                    <a href="news-details.php?id=<?= (int) $item['id_berita'] ?>">
+                                        <strong class="read-more">Read More →</strong>
+                                    </a>
+                                </p>
+
                             </article>
 
-                        <article class="news-card">
-                            <a href="news-details.php">
-                                <div class="news-card-image">
-                                    <img src="Material/Sketch_of_Starry_Night_Over_the_Rhone,_enclosed_in_a_letter_from_Vincent_van_Gogh_to_Eugene_Boch.jpg" alt="Van Gogh Exhibition">
-                            </a>
-                                </div>
-                                    <h5 class="read-more-link"><a href="news-details.php"><strong class="read-more">[DD/MM/YY] News Headline</strong></a></h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc. .</p>
-                                    <p class="read-more-link"><a href="news-details.php"><strong class="read-more">Read More →</strong></a></p>
-                            </article>
+                        <?php endforeach; ?>
 
-                        <article class="news-card">
-                            <a href="news-details.php">
-                                <div class="news-card-image">
-                                    <img src="Material/Sketch_of_Starry_Night_Over_the_Rhone,_enclosed_in_a_letter_from_Vincent_van_Gogh_to_Eugene_Boch.jpg" alt="Van Gogh Exhibition">
-                               </a>
-                                </div>
-                                    <h5 class="read-more-link"><a href="news-details.php"><strong class="read-more">[DD/MM/YY] News Headline</strong></a></h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc. </p>
-                                    <p class="read-more-link"><a href="news-details.php"><strong class="read-more">Read More →</strong></a></p>
-                            </article>
+                    <?php else: ?>
 
-                    </div>
+                        <p>Belum ada berita yang dipublikasikan.</p>
 
+                    <?php endif; ?>
 
-
-
+                </div>
 
         </main>
 

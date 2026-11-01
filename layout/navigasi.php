@@ -19,9 +19,8 @@
                 <a href="addres-opening-hours.php">Address & Opening Hours</a>
                 
                 <?php if (isset($_SESSION["user_id"])): ?>
-                            <a href="my-ticket.php">My Ticket</a>
+                            <a href="booking-ticket.php">Booking Ticket</a>
                         <?php endif; ?>
-
             </aside>
             <aside class="navigasi2">
                     

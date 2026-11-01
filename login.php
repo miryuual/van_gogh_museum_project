@@ -1,45 +1,67 @@
+
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$email_benar = "try@mail.com";
-$password_benar = "tiket123";
+require_once 'koneksi.php';
 
 $pesan = "";
+$email = "";
 
+// Notifikasi setelah registrasi berhasil
+$registrasiBerhasil = isset($_GET['registered']) && $_GET['registered'] == 1;
+
+// Proses login
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST["email"] ?? "");
     $password = $_POST["password"] ?? "";
 
-    if ($email === $email_benar && $password === $password_benar) {
+    // Mencari akun berdasarkan email
+    $query = "SELECT * FROM users
+              WHERE email = :email
+              LIMIT 1";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([
+        'email' => $email
+    ]);
+
+    $user = $stmt->fetch();
+
+    // Memeriksa akun dan password
+    if ($user && password_verify($password, $user['password'])) {
+
         session_regenerate_id(true);
 
-        $_SESSION["user_id"] = 1;
+        $_SESSION["user_id"] = $user["user_id"];
+        $_SESSION["kode_user"] = $user["kode_user"];
         $_SESSION["role"] = "pengunjung";
-        $_SESSION["username"] = "Example User";
+        $_SESSION["username"] = $user["username"];
+        $_SESSION["full_name"] = $user["full_name"];
 
-        header("Location: booking-ticket.php");
+        header("Location: index.php");
         exit;
+
     } else {
         $pesan = "Email or password is incorrect.";
     }
+    
 }
 ?>
 
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Login - Van Gogh Museum</title>
+    <title>Login - Van Gogh Museum</title>
 
-<!-- LINK FONT -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- LINK FONT -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
 <style>
     * {
@@ -143,6 +165,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         font-size: 14px;
     }
 
+    /* Notifikasi registrasi berhasil */
+    .success {
+        margin-bottom: 20px;
+        padding: 12px;
+
+        border: 1px solid #4caf50;
+        border-radius: 3px;
+
+        background-color: rgba(46, 125, 50, 0.9);
+        color: white;
+
+        font-size: 14px;
+    }
+
     .btn {
         display: flex;
         gap: 10px;
@@ -171,18 +207,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     button:hover {
         background-color: #e5c20f;
-    }
-
-    .demo-info {
-        margin-top: 20px;
-        padding: 12px;
-
-        background-color: rgba(255, 255, 255, 0.12);
-        border-radius: 3px;
-
-        font-size: 13px;
-        line-height: 1.7;
-        font-weight: 300;
     }
 
     .register-link,
@@ -223,7 +247,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <main class="main-form">
 
-
     <form action="" method="POST">
 
         <fieldset>
@@ -234,6 +257,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 Login to continue planning your museum visit.
             </p>
 
+            <!-- Notifikasi registrasi berhasil -->
+            <?php if ($registrasiBerhasil): ?>
+                <div class="success" role="status">
+                    Registration successful! Please login with your account.
+                </div>
+            <?php endif; ?>
+
+            <!-- Pesan kesalahan login -->
             <?php if ($pesan !== ""): ?>
                 <div class="error" role="alert">
                     <?= htmlspecialchars($pesan, ENT_QUOTES, "UTF-8") ?>
@@ -249,6 +280,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     name="email"
                     placeholder="example@email.com"
                     autocomplete="username"
+                    value="<?= htmlspecialchars($email, ENT_QUOTES, "UTF-8") ?>"
                     required
                 >
             </div>
@@ -270,13 +302,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <button type="submit">Login</button>
             </div>
 
-            <div class="demo-info">
-                <strong>Demo Account</strong><br>
-                Email: try@mail.com<br>
-                Password: tiket123
-            </div>
-
-            <a href="register-page.php" class="register-link">
+            <a href="register.php" class="register-link">
                 Don't have an account? Register here
             </a>
 

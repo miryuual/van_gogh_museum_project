@@ -69,7 +69,7 @@ header{
 
 .search input{
     display: flex;
-    width: 950px;
+    width: 900px;
     height: 35px;
     padding: 0 3px;
     margin: 0;
@@ -93,50 +93,157 @@ header h1{
 
 }
 
-/*LOGIN*/
+/* USER DROPDOWN */
 .user-dropdown {
     position: relative;
-    display: inline-block;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: 15px;
+    font-family: "Outfit", sans-serif;
 }
 
-.user-dropdown summary {
-    list-style: none;
-    cursor: pointer;
+/* DETAILS SEBAGAI ACUAN POSISI MENU */
+.user-dropdown details {
+    position: relative;
+}
 
+/* TOMBOL USERNAME */
+.user-dropdown-summary {
+    display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+
+    min-height: 42px;
     padding: 0 10px;
-    height: 100%;
+
+    list-style: none;
+    cursor: pointer;
+    white-space: nowrap;
+
+    color: #222;
+    font-size: 20px;
+    font-weight: 700;
+
+    border-radius: 4px;
 }
+
+.user-dropdown-summary::-webkit-details-marker {
+    display: none;
+}
+
+.user-dropdown-summary::marker {
+    content: "";
+}
+
+/* HOVER USERNAME */
+.user-dropdown-summary:hover {
+    background-color: #f0f0f0;
+    color: #111;
+}
+
+/* AVATAR */
+.topbar-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+
+    border-radius: 50%;
+    background-color: #e1e4e6;
+    color: #7d858a;
+    font-size: 20px;
+}
+
+/* PANAH DROPDOWN */
+.dropdown-arrow {
+    margin-left: 2px;
+    color: #000000;
+    font-size: 14px;
+}
+
+/* MENU DROPDOWN */
 .user-menu {
     position: absolute;
-    top: 100%;
-
-    margin: 0;
-
+    top: calc(100% + 5px);
     right: 0;
-    background-color: white;
-    border: 2px solid #000000;
 
-    border-radius: 3px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    width: 175px;
+    margin: 0;
+    padding: 5px 0;
 
-    z-index: 1000;
+    background-color: #fff;
+    color: #222;
 
-    width: 150px;
+    border: 1px solid #d5d9dc;
+    border-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.16);
+
+    z-index: 2000;
 }
 
+/* TAUTAN MENU */
 .user-menu a {
     display: block;
-    padding: 10px;
-    color: black;
+    padding: 11px 15px;
+
+    color: #222;
+    font-size: 16px;
+    font-weight: 600;
     text-decoration: none;
+
+    transition: background-color 0.2s ease;
 }
 
-.user-dropdown-summary{
-    font-size: 18px;
+/* HOVER TAUTAN */
+.user-menu a:hover {
+    background-color: #f9d71c;
+    color: #111;
 }
 
+/* GARIS PEMISAH */
+.user-menu hr {
+    margin: 5px 0;
+    border: 0;
+    border-top: 1px solid #e5e5e5;
+}
+
+.user-dropdown details:not([open]) > .user-menu {
+    display: none;
+}
+
+/* MENU MUNCUL SAAT DETAILS DIBUKA */
+.user-dropdown details[open] > .user-menu {
+    display: block;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+    .user-dropdown {
+        margin-left: 5px;
+    }
+
+    .user-dropdown-summary {
+        gap: 5px;
+        padding: 0 5px;
+        font-size: 14px;
+        
+    }
+
+    .topbar-avatar {
+        width: 27px;
+        height: 27px;
+        font-size: 16px;
+    }
+
+    .user-menu {
+        width: 150px;
+    }
+}
 
 /*MAIN lAYOUT*/
 
@@ -239,25 +346,40 @@ main{
 
 
 
-/*FOOTER*/
-footer{
+/* FOOTER */
+footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 25px;
 
-    height: 200px;
-    padding-left: 250px;
-    padding-right: 45px;
+    min-height: 200px;
+    height: auto;
+    box-sizing: border-box;
+    padding: 30px 45px 30px 250px;
+
     background-color: rgba(242, 201, 76, 0.9);
 }
-.footer-left p, .footer-middle p, .footer-right p{
+
+.footer-left p,
+.footer-middle p,
+.footer-right p {
     margin: 0;
     font-size: 16px;
     line-height: 1.5;
     font-weight: 300;
 }
-.footer-left-bottom p{
-   margin-top: 20px;
+
+.footer-left-bottom p {
+    margin-top: 20px;
 }
 
-
+/* RESPONSIVE */
+@media (max-width: 760px) {
+    footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 25px 20px;
+    }
+}

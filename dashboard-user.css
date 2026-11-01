@@ -1,0 +1,745 @@
+/* ========================================
+   DASAR HALAMAN
+======================================== */
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.user-dashboard-page {
+    min-height: 100vh;
+    margin: 0;
+    background: #eef1f3;
+    font-family: "Outfit", sans-serif;
+    font-weight: 400;
+}
+
+.user-dashboard-page *,
+.user-dashboard-page *::before,
+.user-dashboard-page *::after {
+    box-sizing: border-box;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
+.dashboard-topbar {
+    display: flex;
+    align-items: center;
+    min-height: 54px;
+    padding: 10px 28px;
+    color: #000000;
+    background-color: #f9d71c;
+    border-bottom: 1px solid rgba(255,255,255,.2);
+}
+
+.dashboard-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #000000;
+    font-size: 30px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* ========================================
+   LAYOUT
+======================================== */
+
+.user-dashboard-layout {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #f7f9fb;
+}
+
+/* ========================================
+   SIDEBAR
+======================================== */
+
+.user-profile-sidebar {
+    width: 274px;
+    flex: 0 0 274px;
+    padding: 25px 19px;
+    color: white;
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)),
+        url("Material/Vangogh-Museum Entrance-D.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 130px;
+    height: 130px;
+    margin: 0 auto 15px;
+    overflow: hidden;
+    border: 1px solid #c8ced3;
+    border-radius: 5px;
+    background: #c7c9ca;
+    color: #fff;
+}
+
+.profile-avatar span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(145deg, #c4c7c9, #e1e3e4);
+    font-size: 65px;
+    font-weight: 500;
+}
+
+.profile-name {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.profile-name strong {
+    font-size: 35px;
+    overflow-wrap: anywhere;
+}
+
+.profile-name span {
+    color: #5d6871;
+    font-size: 15px;
+}
+
+.sidebar-primary-button,
+.sidebar-logout-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-bottom: 8px;
+    padding: 11px 12px;
+    border-radius: 4px;
+    color: #fff;
+    text-align: center;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color .2s ease;
+}
+
+.sidebar-primary-button {
+    background: #ffd000;
+    color: #000;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.sidebar-primary-button:hover {
+    background: #000000;
+    color: #ffd000;
+}
+
+.sidebar-logout-button {
+    background: #a83a32;
+}
+
+.sidebar-logout-button:hover {
+    background: #ff1100;
+    color: #fff;
+}
+
+/* ========================================
+   KONTEN UTAMA
+======================================== */
+
+.user-dashboard-main {
+    flex: 1;
+    min-width: 0;
+    padding: 24px 20px;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
+        url("Material/Vangogh-Museum Entrance-D.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.member-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #00ca36;
+    font-size: 17px;
+}
+
+.member-dot {
+    width: 11px;
+    height: 11px;
+    border: 2px solid #2aa66a;
+    border-radius: 50%;
+}
+
+.welcome-heading {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 4px;
+}
+
+.welcome-heading h1 {
+    margin: 0;
+    color: #24333f;
+    font-size: 60px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+
+
+.welcome-description {
+    margin: 12px 0 24px;
+    color: #293640;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* ========================================
+   MENU HORIZONTAL
+======================================== */
+
+.dashboard-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+    margin-top: 15px;
+    border-bottom: 1px solid #000000;
+}
+
+.dashboard-tabs a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 48px;
+    padding: 10px 8px;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    color: #000000;
+    text-align: center;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    transition: background-color .2s ease;
+}
+
+.dashboard-tabs a:hover {
+    background: #eef6ff;
+    color: #075fbd;
+}
+
+.dashboard-tabs a.active {
+    position: relative;
+    top: 1px;
+    border-color: #d6dce1;
+    border-bottom: 1px solid #fff;
+    background: #000000;
+    color: #f9d71c;
+    font-weight: 800;
+    font-size: 17px;
+}
+
+/* ========================================
+   PANEL
+======================================== */
+
+.dashboard-panel {
+    min-width: 0;
+    padding: 24px 20px 28px;
+    background: #fff;
+    border: 1px solid #19354c;
+    border-top: 0;
+}
+
+.dashboard-panel h2 {
+    margin: 0 0 12px;
+    padding-left: 16px;
+    border-left: 4px solid #f9d71c;
+    color: #000000;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.panel-intro {
+    margin: 0 0 24px;
+    color: #000000;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   KARTU RINGKASAN
+======================================== */
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    min-width: 0;
+    min-height: 100px;
+    padding: 17px;
+    background: #fdfdfb;
+    border: 1px solid #e0e4e7;
+}
+
+.summary-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    background: #fff3ad;
+    color: #283b48;
+    font-size: 23px;
+}
+
+.summary-card > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.summary-label {
+    color: #68747d;
+    font-size: 12px;
+}
+
+.summary-card strong {
+    color: #263844;
+    font-size: 23px;
+}
+
+.summary-card .status-active {
+    color: #278355;
+    font-size: 16px;
+}
+
+/* ========================================
+   JUDUL BAGIAN
+======================================== */
+
+.section-heading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 15px 0 14px;
+}
+
+.section-heading-row h3 {
+    margin: 0;
+    color: #293944;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.section-heading-row > a,
+.table-link {
+    color: #344f60;
+    font-size: 13px;
+    text-decoration: underline;
+}
+
+.section-heading-row > a:hover,
+.table-link:hover {
+    color: #000;
+    background: #fff3ad;
+}
+
+/* ========================================
+   TABEL
+======================================== */
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+    padding: 14px 13px;
+    border: 1px solid #d9dee2;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.dashboard-table thead th {
+    background: #f0f2f3;
+    color: #344f60;
+    font-weight: 600;
+}
+
+.dashboard-table tbody tr:nth-child(even) {
+    background: #f5f6f7;
+}
+
+.dashboard-table tbody tr:hover {
+    background: #fff9d9;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 5px 9px;
+    background: #fff3ad;
+    color: #5d4b00;
+    font-size: 12px;
+}
+
+/* ========================================
+   KOLEKSI TERSIMPAN
+======================================== */
+
+.saved-heading {
+    margin-top: 30px;
+}
+
+.saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.saved-item {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 13px;
+    padding: 13px;
+    border: 1px solid #e0e4e7;
+}
+
+.saved-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: #fff3ad;
+    color: #5d4b00;
+    font-size: 21px;
+}
+
+.saved-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.saved-item-info strong {
+    font-size: 14px;
+}
+
+.saved-item-info span {
+    color: #68747d;
+    font-size: 12px;
+}
+
+.small-outline-button,
+.dashboard-action-button {
+    display: inline-block;
+    padding: 8px 11px;
+    border: 1px solid #344f60;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.small-outline-button:hover,
+.dashboard-action-button:hover {
+    background: #f9d71c;
+    color: #111;
+}
+
+.dashboard-action-button {
+    margin-top: 20px;
+    background: #000000;
+    color: #ffe646;
+}
+
+/* ========================================
+   TAMPILAN KOSONG
+======================================== */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 35px 20px;
+    text-align: center;
+    background: #fafbfc;
+    border: 1px dashed #ccd3d8;
+}
+
+.empty-state > span {
+    color: #7b8c97;
+    font-size: 35px;
+}
+
+.empty-state strong {
+    color: #344653;
+}
+
+.empty-state p {
+    max-width: 520px;
+    margin: 0;
+    color: #68747d;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   INFORMASI AKUN
+======================================== */
+
+.account-information {
+    border: 1px solid #dfe4e7;
+    padding-right: 30px;
+    padding-left: 30px;
+}
+
+.account-information > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #e5e8ea;
+}
+
+.account-information > div:last-child {
+    border-bottom: 0;
+}
+
+.account-information span {
+    color: #000000;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.account-information strong {
+    overflow-wrap: anywhere;
+    text-align: right;
+    font-size: 14px;
+}
+
+
+/* ========================================
+   FOOTER
+======================================== */
+
+.user-dashboard-page footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    min-height: 150px;
+    height: auto;
+    padding: 25px 45px;
+    margin: 0;
+    background-color: rgba(242, 201, 76, 0.9);
+}
+
+.user-dashboard-page footer p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   TABLET
+======================================== */
+
+@media (max-width: 1000px) {
+    .user-profile-sidebar {
+        width: 225px;
+        flex-basis: 225px;
+        padding: 25px 15px;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-tabs a {
+        font-size: 13px;
+    }
+
+    .user-dashboard-main {
+        padding: 22px 16px;
+    }
+
+    .dashboard-panel {
+        padding: 20px 15px;
+    }
+}
+
+/* ========================================
+   HP
+======================================== */
+
+@media (max-width: 700px) {
+    .user-dashboard-layout {
+        flex-direction: column;
+        
+    }
+
+    .user-profile-sidebar {
+        display: grid;
+        grid-template-columns: 75px minmax(0, 1fr);
+        align-items: center;
+        gap: 10px 15px;
+        width: 100%;
+        flex: 0 0 auto;
+        padding: 16px;
+    }
+
+    .profile-avatar {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        width: 75px;
+        height: 75px;
+        margin: 0;
+    }
+
+    .profile-avatar span {
+        font-size: 38px;
+    }
+
+    .profile-name {
+        grid-column: 2;
+        align-items: flex-start;
+        margin: 0;
+        text-align: left;
+    }
+
+    .sidebar-primary-button {
+        grid-column: 2;
+        margin: 0;
+    }
+
+    .sidebar-logout-button {
+        grid-column: 1 / -1;
+        margin: 0;
+    }
+
+    .user-dashboard-main {
+        width: 100%;
+        padding: 20px 12px;
+    }
+
+    .dashboard-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-tabs a {
+        min-height: 44px;
+        padding: 9px 5px;
+        border-bottom: 1px solid #d6dce1;
+        font-size: 13px;
+    }
+
+    .dashboard-tabs a.active {
+        border-bottom-color: #fff;
+    }
+
+    .dashboard-panel {
+        padding: 18px 12px;
+    }
+
+    .dashboard-panel h2 {
+        font-size: 20px;
+    }
+
+    .welcome-heading h1 {
+        font-size: 26px;
+    }
+
+    .welcome-description {
+        margin-bottom: 18px;
+        font-size: 14px;
+    }
+
+    .account-information > div {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .account-information strong {
+        text-align: left;
+    }
+
+    .user-dashboard-page footer {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 25px 20px;
+    }
+}
+
+/* HP KECIL */
+
+@media (max-width: 380px) {
+    .dashboard-tabs {
+        grid-template-columns: 1fr;
+    }
+
+    .section-heading-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .saved-item {
+        align-items: flex-start;
+    }
+}
+

@@ -1,8 +1,45 @@
-<?php
+    <?php
     session_start();
-    include 'layout/header.php';?>
-   
-   
+
+    include 'koneksi.php';
+
+    // Mengambil ID koleksi dari URL
+    $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+
+    // Mengambil data koleksi berdasarkan ID
+    $query = "SELECT * FROM koleksi WHERE id_koleksi = :id";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['id' => $id]);
+
+    $koleksi = $stmt->fetch();
+
+    // Jika koleksi tidak ditemukan
+    if (!$koleksi) {
+        die("Koleksi tidak ditemukan.");
+    }
+
+    // Fitur Favorite berdasarkan ID koleksi
+    if (isset($_GET['favorite']) && $_GET['favorite'] === 'toggle') {
+
+        // Membuat array favorite jika belum tersedia
+        if (!isset($_SESSION['favorite'])) {
+            $_SESSION['favorite'] = [];
+        }
+
+        // Mengubah status favorite
+        if (isset($_SESSION['favorite'][$id])) {
+            unset($_SESSION['favorite'][$id]);
+        } else {
+            $_SESSION['favorite'][$id] = true;
+        }
+
+        // Kembali ke halaman detail koleksi yang sama
+        header("Location: detail_koleksi.php?id=" . $id);
+        exit;
+    }
+
+    include 'layout/header.php';
+    ?>
 <style>
 
 /*MAIN CONTENT*/
@@ -131,6 +168,12 @@ h4{
     margin-right: 80px;
 }
 
+.artwork-actions {
+    cursor: pointer;
+}
+
+
+
 
 </style>
     
@@ -145,88 +188,180 @@ h4{
         <!--NAViGASI-->
              <?php include 'layout/navigasi.php'; ?>
 
-    <!--main content-->
-        <main>
-            <h2 class="main-head">Almond Blossom</h2>
+<!-- MAIN CONTENT -->
+<main>
 
-            <section class="collection-detail">
-                <div class="collection-bacground"  style="--artwork-color: #8B6F47;"></div>
-                <img src="Material/vangoghmuseum-s0176V1962-800.jpg" alt="Almond Blossom" class="collection-detail-image">
+    <!-- JUDUL KOLEKSI -->
+    <h2 class="main-head">
+        <?= htmlspecialchars($koleksi['judul_koleksi']) ?>
+    </h2>
 
-            </section>
 
-            <h4>Almond Blossom</h4>
-            <div class="artwork-container">
-                <div class="artwork-actions">
-                    <a id="zoomOut">[−]</a>
-                    <a id="zoomIn">[+]</a>
+    <!-- GAMBAR KOLEKSI -->
+    <section class="collection-detail">
 
-                    <a href="Material/vangoghmuseum-s0176V1962-800.jpg" download>
-                       [Download]
+        <div
+            class="collection-bacground"
+            style="--artwork-color: #8B6F47;"
+        ></div>
+
+        <img
+            src="<?= htmlspecialchars($koleksi['gambar_koleksi']) ?>"
+            alt="<?= htmlspecialchars($koleksi['judul_koleksi']) ?>"
+            class="collection-detail-image"
+            id="artworkImage"
+        >
+
+    </section>
+
+
+    <!-- JUDUL DI BAWAH GAMBAR -->
+    <h4>
+        <?= htmlspecialchars($koleksi['judul_koleksi']) ?>
+    </h4>
+
+
+    <!-- ARTWORK ACTIONS -->
+    <div class="artwork-container">
+
+        <div class="artwork-actions">
+
+            <a href="#" id="zoomOut">[−]</a>
+
+            <a href="#" id="zoomIn">[+]</a>
+
+            <a
+                href="<?= htmlspecialchars($koleksi['gambar_koleksi']) ?>"
+                download
+            >
+                [Download]
+            </a>
+
+            <a href="#" id="shareButton">[Share]</a>
+
+            <a
+                href="detail_koleksi.php?id=<?= $id ?>&favorite=toggle"
+                class="favorite-btn"
+            >
+
+                <?php
+                echo isset($_SESSION['favorite'][$id])
+                    ? '[♥ Favorite]'
+                    : '[♡ Favorite]';
+                ?>
+
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- DESCRIPTION AND OBJECT INFORMATION -->
+    <section class="collection-detail">
+
+
+        <!-- DESCRIPTION -->
+        <div class="collection-description">
+
+            <h4>Description</h4>
+
+            <p>
+                <?= nl2br(htmlspecialchars($koleksi['deskripsi'] ?? '')) ?>
+            </p>
+
+
+            <!-- LINK RELATED PAGES -->
+            <div class="kategori">
+
+                <p><strong>Lihat Juga:</strong></p>
+
+                <div class="link-a">
+
+                    <a href="news.php">News</a>
+
+                    <a href="biography.php">Biografi</a>
+
+                    <a href="privacy-policy.php">Privacy Policy</a>
+
+                    <a href="About us.php">About Us</a>
+
+                    <a href="ticket-ticketprice.php">
+                        Ticket & Ticket Price
                     </a>
 
-                    <a href="" id="shareButton">
-                        [Share]
-                    </a>
                 </div>
 
             </div>
-            <section class="collection-detail">
-
-                <div class="collection-description">
-                    <h4>Description</h4>
-                    <p>Almond Blossom adalah lukisan karya Vincent van Gogh yang dibuat pada tahun 1890. Lukisan ini menggambarkan cabang-cabang pohon almond yang sedang mekar dengan latar belakang langit biru cerah. Van Gogh menciptakan karya ini sebagai hadiah untuk merayakan kelahiran keponakannya, Vincent Willem van Gogh, anak dari saudaranya Theo. Lukisan ini mencerminkan gaya khas Van Gogh dengan penggunaan warna-warna cerah dan sapuan kuas yang ekspresif, serta menunjukkan ketertarikannya pada alam dan simbolisme kehidupan baru.</p>
-               
-                    <div class="kategori">
-                        <P><strong>Lihat Juga: </strong></P>
-                            <div class="link-a">
-                                <a href="news.php">News</a>
-                                <a href="biography.php">Biografi</a>
-                                <a href="privacy-policy.php">Privacy Policy</a>
-                                <a href="About us.php">About Us</a>
-                                <a href="ticket-ticketprice.php">Ticket & Ticket Price</a>
-                            </div>
-                    </div>
-
-                    <a href="collection.php" class="back-button"> ← Back to Collection</a>
-
-                </div>
-
-                <div class="object-information">
-                    <h4>Object Information</h4>
-
-                    <p><strong>F-number:</strong></p>
-                    <p>F0671</p>
-
-                    <p><strong>JH-number:</strong> </p>
-                    <p>JH 1731</p>
-
-                    <p><strong>Object number:</strong></p>
-                    <P>s0176V1962</P>
-
-                    <p><strong>Dimensions:</strong> </p>
-                    <p>73.3 cm x 92.4 cm, 94 cm x 112.9 cm, 8 cm</p>
-
-                    <p><strong>Provenance:</strong></p>
-                    <p>Sent by the artist from Saint-Rémy-de-Provence to his brother Theo van Gogh, Paris, at the end of April 1890; after his death on 25 January 1891, inherited by his widow, Jo van Gogh-Bonger, and their son, Vincent Willem van Gogh, Paris; administered until her death on 2 September 1925 by Jo van Gogh-Bonger, Bussum/Amsterdam/Laren; transferred by Vincent Willem van Gogh, Laren, on 10 July 1962 to the Vincent van Gogh Foundation, Amsterdam; agreement concluded between the Vincent van Gogh Foundation and the State of the Netherlands, in which the preservation and management of the collection, and its placing in the Rijksmuseum Vincent van Gogh, to be realized in Amsterdam, is entrusted to the State, 21 July 1962; given on loan until the opening of the museum on 2 June 1973 to the Stedelijk Museum, Amsterdam; on permanent loan to the Rijksmuseum Vincent van Gogh from 2 June 1973 and at the Van Gogh Museum, Amsterdam, since 1 July 1994.</p>
-                    
-                    <p><strong>artist</strong> </p>
-                    <p>Vincent van Gogh</p>
-
-                    
-                    <p><strong>Credits (obliged to state)</strong> </p>
-                    <p>Van Gogh Museum, Amsterdam (Vincent van Gogh Foundation)</p>
-                </div>
-            </section>
 
 
+            <!-- BACK TO COLLECTION -->
+            <a href="collection.php" class="back-button">
+                ← Back to Collection
+            </a>
+
+        </div>
 
 
+        <!-- OBJECT INFORMATION -->
+        <div class="object-information">
+
+            <h4>Object Information</h4>
 
 
+            <p><strong>F-number:</strong></p>
 
-        </main>
+            <p>
+                <?= htmlspecialchars($koleksi['f_number'] ?? '-') ?>
+            </p>
 
+
+            <p><strong>JH-number:</strong></p>
+
+            <p>
+                <?= htmlspecialchars($koleksi['jh_number'] ?? '-') ?>
+            </p>
+
+
+            <p><strong>Object number:</strong></p>
+
+            <p>
+                <?= htmlspecialchars($koleksi['object_number'] ?? '-') ?>
+            </p>
+
+
+            <p><strong>Dimensions:</strong></p>
+
+            <p>
+                <?= htmlspecialchars($koleksi['dimensi'] ?? '-') ?>
+            </p>
+
+
+            <p><strong>Provenance:</strong></p>
+
+            <p>
+                <?= nl2br(htmlspecialchars($koleksi['provenance'] ?? '-')) ?>
+            </p>
+
+
+            <p><strong>Artist:</strong></p>
+
+            <p>
+                <?= htmlspecialchars($koleksi['seniman']) ?>
+            </p>
+
+
+            <p><strong>Credits (obliged to state):</strong></p>
+
+            <p>
+                <?= htmlspecialchars($koleksi['credits'] ?? '-') ?>
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
     </div>
 
 

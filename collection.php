@@ -1,8 +1,123 @@
-<?php
+    <?php
     session_start();
-    include 'layout/header.php';?>
+    include 'koneksi.php';
 
+    // Menampung kata pencarian
+    $keyword = trim($_GET['q'] ?? '');
 
+    // Menampung filter
+    $artists = $_GET['artist'] ?? [];
+    $types = $_GET['type'] ?? [];
+    $locations = $_GET['location'] ?? [];
+    $years = $_GET['year'] ?? [];
+
+    // Memastikan nilai filter berbentuk array
+    $artists = is_array($artists) ? $artists : [];
+    $types = is_array($types) ? $types : [];
+    $locations = is_array($locations) ? $locations : [];
+    $years = is_array($years) ? $years : [];
+
+    // Menyiapkan kondisi pencarian
+    $where = [];
+    $params = [];
+
+    // Pencarian berdasarkan judul, seniman, atau deskripsi
+    if ($keyword !== '') {
+        $where[] = "(
+            judul_koleksi LIKE :keyword
+            OR seniman LIKE :keyword
+            OR deskripsi LIKE :keyword
+        )";
+
+        $params['keyword'] = "%$keyword%";
+    }
+
+    // Filter seniman
+    if (!empty($artists)) {
+        $placeholders = [];
+
+        foreach ($artists as $i => $artist) {
+            $key = "artist_" . $i;
+            $placeholders[] = ":" . $key;
+            $params[$key] = $artist;
+        }
+
+        $where[] = "seniman IN (" . implode(',', $placeholders) . ")";
+    }
+
+    // Filter jenis koleksi
+    if (!empty($types)) {
+        $placeholders = [];
+
+        foreach ($types as $i => $type) {
+            $key = "type_" . $i;
+            $placeholders[] = ":" . $key;
+            $params[$key] = $type;
+        }
+
+        $where[] = "jenis_koleksi IN (" . implode(',', $placeholders) . ")";
+    }
+
+    // Filter lokasi
+    if (!empty($locations)) {
+        $placeholders = [];
+
+        foreach ($locations as $i => $location) {
+            $key = "location_" . $i;
+            $placeholders[] = ":" . $key;
+            $params[$key] = $location;
+        }
+
+        $where[] = "lokasi_pembuatan IN (" . implode(',', $placeholders) . ")";
+    }
+
+    // Filter tahun
+    $yearConditions = [];
+
+    foreach ($years as $i => $year) {
+        $key = "year_" . $i;
+
+        if (strpos($year, '-') !== false) {
+            // Filter berdasarkan rentang tahun
+            [$startYear, $endYear] = explode('-', $year);
+
+            $startKey = $key . "_start";
+            $endKey = $key . "_end";
+
+            $yearConditions[] =
+                "(tahun_pembuatan BETWEEN :$startKey AND :$endKey)";
+
+            $params[$startKey] = (int) $startYear;
+            $params[$endKey] = (int) $endYear;
+
+        } else {
+            // Filter berdasarkan satu tahun
+            $yearConditions[] = "tahun_pembuatan = :$key";
+            $params[$key] = (int) $year;
+        }
+    }
+
+    if (!empty($yearConditions)) {
+        $where[] = "(" . implode(' OR ', $yearConditions) . ")";
+    }
+
+    // Menyusun query utama
+    $sql = "SELECT * FROM koleksi";
+
+    if (!empty($where)) {
+        $sql .= " WHERE " . implode(' AND ', $where);
+    }
+
+    $sql .= " ORDER BY id_koleksi DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    $koleksi = $stmt->fetchAll();
+
+    // Memuat header setelah proses PHP
+    include 'layout/header.php';
+    ?>
 
     <style>
 
@@ -227,316 +342,250 @@
 
     <!--main content-->
         <main>
-            <div class="collection-header">
-                <h1>Collection</h1>
-                    <div class="filter-and-search">
-                          <form action="" method="get" class="collection-search">
-                                <input type="text" placeholder="Search Collection">
-                                <button type="submit">Search</button>
-                           </form>
-                       
-                        <button class="filter-button" onclick="filterPopup.showModal()">Filter</button>
-                            <dialog id="filterPopup">
+           <div class="collection-header">
+            <h1>Collection</h1>
 
-                            <form class="filter-pop-button" method="dialog">
-                                <div class="filter-close">
-                                    <h3>Select a filter option:</h3>
-                                    <button type="submit" class="close-button">X</button>
-                                </div>
-                                    <div class="filter-grid">
-                                        <section class="filter-group">
-                                                    <h4>Artist</h4>
+            <div class="filter-and-search">
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Van Gogh">
-                                                        Van Gogh
-                                                    </label>
+                <!-- SEARCH -->
+                <form action="" method="get" class="collection-search">
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Claude Monet">
-                                                        Claude Monet
-                                                    </label>
+                    <input
+                        type="text"
+                        name="q"
+                        placeholder="Search Collection"
+                        value="<?= htmlspecialchars($keyword) ?>"
+                    >
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Henri Rivière">
-                                                        Henri Rivière
-                                                    </label>
+                    <button type="submit">Search</button>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Utagawa Kunisada ">
-                                                        Utagawa Kunisada
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Emile Bernard">
-                                                        Emile Bernard
-                                                    </label>
-                                        </section>
+                </form>
 
-                                        <section class="filter-group">
-                                                    <h4>Type</h4>
+                <!-- FILTER BUTTON -->
+                <button
+                    class="filter-button"
+                    type="button"
+                    onclick="document.getElementById('filterPopup').showModal()"
+                >
+                    Filter
+                </button>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="painting">
-                                                        Painting
-                                                    </label>
+                <!-- FILTER POPUP -->
+                <dialog id="filterPopup">
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="drawing">
-                                                        Drawing
-                                                    </label>
+                    <form action="" method="get" class="filter-pop-button">
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="print">
-                                                        Print
-                                                    </label>
+                        <input
+                            type="hidden"
+                            name="q"
+                            value="<?= htmlspecialchars($keyword) ?>"
+                        >
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="letter">
-                                                        Letter
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="sketch">
-                                                        Sketch
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="artist’s book">
-                                                        Artist’s Book
-                                                    </label>
-                                        </section>
-                                        <section class="filter-group">
-                                                    <h4>Location</h4>
+                        <div class="filter-close">
+                            <h3>Select a filter option:</h3>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Nuenen">
-                                                        Nuenen
-                                                    </label>
+                            <button
+                                type="button"
+                                class="close-button"
+                                onclick="document.getElementById('filterPopup').close()"
+                            >
+                                X
+                            </button>
+                        </div>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Paris">
-                                                        Paris
-                                                    </label>
+                        <div class="filter-grid">
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Arles">
-                                                        Arles
-                                                    </label>
+                            <!-- ARTIST -->
+                            <section class="filter-group">
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Saint-Rémy-de-Provence ">
-                                                        Saint-Rémy-de-Provence
-                                                    </label>
+                                <h4>Artist</h4>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Auvers-sur-Oise">
-                                                        Auvers-sur-Oise
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="Osaka">
-                                                        Osaka
-                                                    </label>
-                                    
-                                        </section>
-                                        <section class="filter-group">
-                                                    <h4>Year</h4>
+                                <?php
+                                $artistOptions = [
+                                    'Vincent van Gogh',
+                                    'Claude Monet',
+                                    'Henri Rivière',
+                                    'Utagawa Kunisada',
+                                    'Emile Bernard'
+                                ];
+                                ?>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1860 - 1870">
-                                                        1860 - 1870
-                                                    </label>
+                                <?php foreach ($artistOptions as $artist): ?>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="artist[]"
+                                            value="<?= htmlspecialchars($artist) ?>"
+                                            <?= in_array($artist, $artists) ? 'checked' : '' ?>
+                                        >
+                                        <?= htmlspecialchars($artist) ?>
+                                    </label>
+                                <?php endforeach; ?>
 
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1871-1880 ">
-                                                        1871-1880 
-                                                    </label>
-
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1881 ">
-                                                        1881 
-                                                    </label>
-
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1882">
-                                                        1882
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1883">
-                                                        1883
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1884">
-                                                        1884
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1885">
-                                                        1885
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1886">
-                                                        1886
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1887">
-                                                        1887
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1888">
-                                                        1888
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1889">
-                                                        1889
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1890">
-                                                        1890
-                                                    </label>
-                                                     
-                                                    <label>
-                                                        <input type="checkbox" name="type" value="1891-1900">
-                                                        1891-1900
-                                                    </label>
+                            </section>
 
 
-                                        </section>
+                            <!-- TYPE -->
+                            <section class="filter-group">
 
-                                    </div>
-                            </form>
-                        </dialog>
-                    </div>
+                                <h4>Type</h4>
+
+                                <?php
+                                $typeOptions = [
+                                    'Painting',
+                                    'Drawing',
+                                    'Print',
+                                    'Letter',
+                                    'Sketch',
+                                    "Artist's Book"
+                                ];
+                                ?>
+
+                                <?php foreach ($typeOptions as $type): ?>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="type[]"
+                                            value="<?= htmlspecialchars($type) ?>"
+                                            <?= in_array($type, $types) ? 'checked' : '' ?>
+                                        >
+                                        <?= htmlspecialchars($type) ?>
+                                    </label>
+                                <?php endforeach; ?>
+
+                            </section>
+
+
+                            <!-- LOCATION -->
+                            <section class="filter-group">
+
+                                <h4>Location</h4>
+
+                                <?php
+                                $locationOptions = [
+                                    'Nuenen',
+                                    'Paris',
+                                    'Arles',
+                                    'Saint-Rémy-de-Provence',
+                                    'Auvers-sur-Oise',
+                                    'Osaka'
+                                ];
+                                ?>
+
+                                <?php foreach ($locationOptions as $location): ?>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="location[]"
+                                            value="<?= htmlspecialchars($location) ?>"
+                                            <?= in_array($location, $locations) ? 'checked' : '' ?>
+                                        >
+                                        <?= htmlspecialchars($location) ?>
+                                    </label>
+                                <?php endforeach; ?>
+
+                            </section>
+
+
+                            <!-- YEAR -->
+                            <section class="filter-group">
+
+                                <h4>Year</h4>
+
+                                <?php
+                                $yearOptions = [
+                                    '1860-1870',
+                                    '1871-1880',
+                                    '1881',
+                                    '1882',
+                                    '1883',
+                                    '1884',
+                                    '1885',
+                                    '1886',
+                                    '1887',
+                                    '1888',
+                                    '1889',
+                                    '1890',
+                                    '1891-1900'
+                                ];
+                                ?>
+
+                                <?php foreach ($yearOptions as $year): ?>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            name="year[]"
+                                            value="<?= $year ?>"
+                                            <?= in_array($year, $years) ? 'checked' : '' ?>
+                                        >
+                                        <?= str_replace('-', ' - ', $year) ?>
+                                    </label>
+                                <?php endforeach; ?>
+
+                            </section>
+
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <button type="submit">Apply Filter</button>
+
+                            <a
+                                href="collection.php"
+                                style="color: black; margin-left: 10px;"
+                            >
+                                Reset Filter
+                            </a>
+                        </div>
+
+                    </form>
+
+                </dialog>
+
             </div>
-
+        </div>
             <hr>
             
-            <div class="collection-grid">
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/The-Pink-Peach-Tree.jpg" alt="The Pink Peach Tree">
-                    <div class="collection-card-content">
-                        <h3>The Pink Peach Tree</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/vangogh-selfpotrait.jpg" alt="Van Gogh Self-Portrait">
-                    <div class="collection-card-content">
-                        <h3>Van Gogh Self-Portrait</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/Vincent_van_gogh-sunflower.jpg" alt="Sunflower">
-                    <div class="collection-card-content">
-                        <h3>Sunflower</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/vincent_van_gogh-Kingfisher_by_the_Waterside.jpg" alt="Kingfisher by the Waterside">
-                    <div class="collection-card-content">
-                        <h3>Kingfisher by the Waterside</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/view-of-paris-vangogh.jpg" alt="View of Paris">
-                    <div class="collection-card-content">
-                        <h3>View of Paris</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/vangoghmuseum-s0176V1962-800.jpg" alt="Almond Blossom">
-                    <div class="collection-card-content">
-                        <h3>Almond Blossom</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/vangoghmuseum-s0184V1962-800.jpg" alt="Blossoming Almond Branch in a Glass">
-                    <div class="collection-card-content">
-                        <h3>Blossoming Almond Branch in a Glass</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/Claude_Monet-Tulip_Fields_near_The_Hague.jpg" alt="Tulip Fields near The Hague">
-                    <div class="collection-card-content">
-                        <h3>Tulip Fields near The Hague</h3>
-                        <p>Claude Monet</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/The Bridge at Courbevoie.jpg" alt="The Bridge at Courbevoie">
-                    <div class="collection-card-content">
-                        <h3>The Bridge at Courbevoie</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/The-Bedroom.jpg" alt="The Bedroom">
-                    <div class="collection-card-content">
-                        <h3>The Bedroom</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/Seascape near Les Saintes-Maries-de-la-Mer.jpg" alt="Seascape near Les Saintes-Maries-de-la-Mer">
-                    <div class="collection-card-content">
-                        <h3>Seascape near Les Saintes-Maries-de-la-Mer</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                    
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/Gate in the Paris Ramparts.jpg" alt="Gate in the Paris Ramparts">
-                    <div class="collection-card-content">
-                        <h3>Gate in the Paris Ramparts</h3>
-                        <p>Van Gogh</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/From the Place de la Concorde (De la place de la Concorde).jpg" alt="From the Place de la Concorde">
-                    <div class="collection-card-content">
-                        <h3>From the Place de la Concorde</h3>
-                        <p>Henri Rivière</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/The Eiffel Tower under Construction, seen from the Trocadéro (La Tour en construction, vue de Trocadéro).jpg" alt="The Eiffel Tower under Construction">
-                    <div class="collection-card-content">
-                        <h3>The Eiffel Tower under Construction, seen from the Trocadéro</h3>
-                        <p>Henri Rivière</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/From the Pont des Saints Pères (Du Pont des Saints Pères).jpg" alt="From the Pont des Saints Pères">
-                    <div class="collection-card-content">
-                        <h3>From the Pont des Saints Pères</h3>
-                        <p>Henri Rivière</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/Nihon Bridge, from the series Views of Famous Places Along the Tōkaidō.jpg" alt="Nihon Bridge, from the series Views of Famous Places Along the Tōkaidō">
-                    <div class="collection-card-content">
-                        <h3>Nihon Bridge, from the series Views of Famous Places Along the Tōkaidō</h3>
-                        <p>Utagawa Kunisada</p>
-                    </div>
-                </a>
-                <a href="detail_koleksi.php" class="collection-card">
-                    <img src="Material/A Newly Printed Overview of the Eight Views on Famous Places in Edo, fourth sheet of a pentaptych.jpg" alt="A Newly Printed Overview of the Eight Views on Famous Places in Edo, fourth sheet of a pentaptych">
-                    <div class="collection-card-content">
-                        <h3>A Newly Printed Overview of the Eight Views on Famous Places in Edo, fourth sheet of a pentaptych</h3>
-                        <p>Utagawa Kunisada</p>
-                    </div>
-                </a>
+         <div class="collection-grid">
 
+                <?php if (!empty($koleksi)): ?>
+
+                    <?php foreach ($koleksi as $item): ?>
+
+                        <a
+                            href="detail_koleksi.php?id=<?= (int) $item['id_koleksi'] ?>"
+                            class="collection-card"
+                        >
+
+                            <img
+                                src="<?= htmlspecialchars($item['gambar_koleksi']) ?>"
+                                alt="<?= htmlspecialchars($item['judul_koleksi']) ?>"
+                            >
+
+                            <div class="collection-card-content">
+
+                                <h3>
+                                    <?= htmlspecialchars($item['judul_koleksi']) ?>
+                                </h3>
+
+                                <p>
+                                    <?= htmlspecialchars($item['seniman']) ?>
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+
+                    <p>
+                        No collection found.
+                    </p>
+
+                <?php endif; ?>
 
             </div>
-
-
-
-
-
-
-
         </main>
 
     </div>

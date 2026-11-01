@@ -1,8 +1,44 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+session_start();
+
+require_once 'koneksi.php';
+
+// Mengambil 3 berita terbaru yang sudah dipublikasikan
+$sqlBerita = "
+    SELECT
+        id_berita,
+        judul_berita,
+        tanggal_berita,
+        ringkasan,
+        gambar_utama
+    FROM berita
+    WHERE status = 'Dipublikasikan'
+    ORDER BY tanggal_berita DESC, id_berita DESC
+    LIMIT 3
+";
+
+$stmtBerita = $pdo->prepare($sqlBerita);
+$stmtBerita->execute();
+$beritaTerbaru = $stmtBerita->fetchAll();
+
+// Mengambil 5 koleksi terbaru
+$sqlKoleksi = "
+    SELECT
+        id_koleksi,
+        judul_koleksi,
+        lokasi_pembuatan,
+        tahun_pembuatan,
+        gambar_koleksi
+    FROM koleksi
+    ORDER BY id_koleksi DESC
+    LIMIT 5
+";
+
+$stmtKoleksi = $pdo->prepare($sqlKoleksi);
+$stmtKoleksi->execute();
+$popularCollections = $stmtKoleksi->fetchAll();
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -29,51 +65,69 @@ if (session_status() === PHP_SESSION_NONE) {
         </a>
     </section>
 
-    <form action="" method="get" class="search">
+    <form action="search.php" method="get" class="search">
         <input
             type="text"
             name="search"
             placeholder="Search Van Gogh Museum"
+            value="<?= htmlspecialchars($_GET['search'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+            required
         >
         <button type="submit">Search</button>
     </form>
 
-    <div class="user-dropdown">
+        <div class="user-dropdown">
+            <details>
+                <summary class="user-dropdown-summary">
 
-        <details>
-            <summary class="user-dropdown-summary">
+                    <?php if (isset($_SESSION['user_id'])): ?>
 
-                <?php
-                echo htmlspecialchars(
-                    $_SESSION['username'] ?? 'Anonymous',
-                    ENT_QUOTES,
-                    'UTF-8'
-                );
-                ?>
+                        <?php
+                        $profilePicture = !empty($_SESSION['profile_picture'])
+                            ? $_SESSION['profile_picture']
+                            : 'Material/default-profile.png';
+                        ?>
 
-                <span>▼</span>
-            </summary>
+                        <img
+                            src="<?= htmlspecialchars($profilePicture, ENT_QUOTES, 'UTF-8'); ?>"
+                            alt="Foto profil"
+                            class="topbar-avatar"
+                        >
 
-            <div class="user-menu">
+                        <?= htmlspecialchars(
+                            $_SESSION['username'] ?? 'Pengguna',
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ); ?>
 
-                <?php if (isset($_SESSION['username'])): ?>
+                    <?php else: ?>
 
-                    <a href="log-out.php">Log out</a>
+                        <span>Anonymous</span>
 
-                <?php else: ?>
+                    <?php endif; ?>
 
-                    <a href="register-page.php">Register</a>
+                    <span class="dropdown-arrow">▼</span>
 
-                    <hr>
+                </summary>
 
-                    <a href="login.php">Log in</a>
+                <div class="user-menu">
 
-                <?php endif; ?>
+                    <?php if (isset($_SESSION['user_id'])): ?>
 
-            </div>
-        </details>
+                        <a href="dashboard-user.php?tab=account">Profil Saya</a>
+                        <a href="log-out.php">Log out</a>
 
-    </div>
+                    <?php else: ?>
+
+                        <a href="register-page.php">Register</a>
+                        <hr>
+                        <a href="login.php">Log in</a>
+
+                    <?php endif; ?>
+
+                </div>
+            </details>
+        </div>
 
 </header>
 
@@ -131,96 +185,106 @@ if (session_status() === PHP_SESSION_NONE) {
         <!--RECOMENDED COLLECTION-->
 
         <section class="featured-collection">
-           <a href="collection.php"><h5>Popular Collection</h5></a>
-            <div class="collection-scroll">
-                    <a href="collection.php" class="painting-card">
-                        <img src="Material/Vincent_van_gogh-sunflower.jpg" alt="Van Gogh Sunflowers">
-                        <div class="painting-info">
-                            <h6>Sunflowers</h6>
-                            <p>AUGUST 1888, ARLES</p>
-                        </div>
-                    </a>
-                    <a href="collection.php" class="painting-card">
-                        <img src="Material/The-Pink-Peach-Tree.jpg" alt="The Pink Peach Tree">
-                        <div class="painting-info">
-                            <h6>The Pink Peach Tree</h6>
-                            <p>April-May 1888, Arles</p>
-                        </div>
-                    </a>
-                    <a href="collection.php" class="painting-card">
-                        <img src="Material/vangogh-selfpotrait.jpg" alt="Van Gogh Self-Portrait">
-                        <div class="painting-info">
-                            <h6>Self-Portrait</h6>
-                            <p>1889, Paris</p>
-                        </div>
-                    </a>
-                    <a href="collection.php" class="painting-card">
-                        <img src="Material/vincent_van_gogh-Trees_and_Undergrowth.jpg" alt="Van Gogh Trees and Undergrowth">
-                        <div class="painting-info">
-                            <h6>Trees and Undergrowth</h6>
-                            <p>1889, Paris</p>
-                        </div>
+    <a href="collection.php">
+        <h5>Popular Collection</h5>
+    </a>
 
-                    </a>
-                    <a href="collection.php" class="painting-card">
-                        <img src="Material/vangoghmuseum-s0176V1962-800.jpg" alt="Almond Blossom">
-                        <div class="painting-info">
-                            <h6>Almond Blossom</h6>
-                            <p>February 1890, Saint-Rémy</p>
-                        </div>
-                    </a>
-                </div>
-            </section>
+            <div class="collection-scroll">
+
+                <?php if (!empty($popularCollections)): ?>
+
+                    <?php foreach ($popularCollections as $collection): ?>
+
+                        <a href="detail_koleksi.php?id=<?= (int) $collection['id_koleksi']; ?>"
+                        class="painting-card">
+
+                            <img
+                                src="<?= htmlspecialchars($collection['gambar_koleksi'], ENT_QUOTES, 'UTF-8'); ?>"
+                                alt="<?= htmlspecialchars($collection['judul_koleksi'], ENT_QUOTES, 'UTF-8'); ?>"
+                            >
+
+                            <div class="painting-info">
+
+                                <h6>
+                                    <?= htmlspecialchars($collection['judul_koleksi'], ENT_QUOTES, 'UTF-8'); ?>
+                                </h6>
+
+                                <p>
+                                    <?php if (!empty($collection['tahun_pembuatan'])): ?>
+                                        <?= htmlspecialchars((string) $collection['tahun_pembuatan'], ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($collection['lokasi_pembuatan'])): ?>
+                                        <?= !empty($collection['tahun_pembuatan']) ? ', ' : ''; ?>
+                                        <?= htmlspecialchars($collection['lokasi_pembuatan'], ENT_QUOTES, 'UTF-8'); ?>
+                                    <?php endif; ?>
+                                </p>
+
+                            </div>
+                        </a>
+
+                    <?php endforeach; ?>
+
+                <?php else: ?>
+
+                    <p>No collections available yet.</p>
+
+                <?php endif; ?>
+
+            </div>
+        </section>
 
 
 
      <!--News-->
 
-            <section class="news-content">
-                <div class="news-head">
-                    <a href="news.php">
-                        <h4>News</h4>
-                    </a>
-                 </div>
+     <section class="news-content">
+            <div class="news-head">
+                <a href="news.php">
+                    <h4>News</h4>
+                </a>
+            </div>
 
-                    <div class="news-container">
+            <div class="news-container">
 
-                        <article class="news-card">
-                            <a href="news.php">
-                                <div class="news-card-image">
-                                    <img src="Material/Sketch_of_Starry_Night_Over_the_Rhone,_enclosed_in_a_letter_from_Vincent_van_Gogh_to_Eugene_Boch.jpg" alt="Van Gogh Exhibition">
-                                </div>
-                                    <h5>[DD/MM/YY] News Headline</h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc.</p>
-                            </a>
-                            </article>
+                <?php if (!empty($beritaTerbaru)): ?>
+
+                    <?php foreach ($beritaTerbaru as $berita): ?>
 
                         <article class="news-card">
-                            <a href="news.php">
+                            <a href="news-details.php?id=<?= (int) $berita['id_berita']; ?>">
+
                                 <div class="news-card-image">
-                                    <img src="Material/Sketch_of_Starry_Night_Over_the_Rhone,_enclosed_in_a_letter_from_Vincent_van_Gogh_to_Eugene_Boch.jpg" alt="Van Gogh Exhibition">
+                                    <img
+                                        src="<?= htmlspecialchars($berita['gambar_utama'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        alt="<?= htmlspecialchars($berita['judul_berita'], ENT_QUOTES, 'UTF-8'); ?>"
+                                    >
                                 </div>
-                                    <h5>[DD/MM/YY] News Headline</h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc.</p>
+
+                                <h5>
+                                    [<?= date('d/m/y', strtotime($berita['tanggal_berita'])); ?>]
+                                    <?= htmlspecialchars($berita['judul_berita'], ENT_QUOTES, 'UTF-8'); ?>
+                                </h5>
+
+                                <p>
+                                    <?= htmlspecialchars($berita['ringkasan'], ENT_QUOTES, 'UTF-8'); ?>
+                                </p>
+
                             </a>
-                            </article>
+                        </article>
 
-                        <article class="news-card">
-                            <a href="news.php">
-                                <div class="news-card-image">
-                                    <img src="Material/Sketch_of_Starry_Night_Over_the_Rhone,_enclosed_in_a_letter_from_Vincent_van_Gogh_to_Eugene_Boch.jpg" alt="Van Gogh Exhibition">
-                                </div>
-                                    <h5>[DD/MM/YY] News Headline</h5>
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc. Sed euismod, nunc ut aliquam tincidunt, nunc nisl aliquam nisl, eget aliquam nunc nisl eget nunc.</p>
-                            </a>
-                            </article>
+                    <?php endforeach; ?>
 
-                    </div>
-                    
-                    <a class="news-btn" href="news.php">News Page →</a>
+                <?php else: ?>
 
-                </section>
+                    <p>There are no news articles available yet.</p>
 
+                <?php endif; ?>
+
+            </div>
+
+            <a class="news-btn" href="news.php">News Page →</a>
+        </section>
         </main>
 
     </div>
