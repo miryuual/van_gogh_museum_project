@@ -81,7 +81,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
                 <?php if (isset($_SESSION['user_id'])): ?>
 
-                    <a href="dashboard-user.php?tab=account">Profil Saya</a>
+                    <a href="dashboard/dashboard-user.php?tab=account">Profil Saya</a>
                     <a href="log-out.php">Log out</a>
 
                 <?php else: ?>
