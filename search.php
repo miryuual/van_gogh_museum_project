@@ -18,13 +18,13 @@ $halaman = [
     [
         'judul' => 'Biography',
         'deskripsi' => 'Discover the life, background, journey, and artistic development of Vincent van Gogh.',
-        'url' => 'biografi.php',
+        'url' => 'biography.php',
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'Collection',
         'deskripsi' => 'Explore paintings, drawings, prints, and letters by Vincent van Gogh.',
-        'url' => 'koleksi.php',
+        'url' => 'collection.php',
         'kategori' => 'Website Page'
     ],
     [
@@ -36,7 +36,7 @@ $halaman = [
     [
         'judul' => 'About Us',
         'deskripsi' => 'Learn about the museum history, collection, research, and museum building.',
-        'url' => 'about.php',
+        'url' => 'About Us.php',
         'kategori' => 'Website Page'
     ],
     [

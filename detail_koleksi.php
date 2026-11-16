@@ -1,45 +1,134 @@
-    <?php
+<?php
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
+}
 
-    include 'koneksi.php';
+require_once 'koneksi.php';
 
-    // Mengambil ID koleksi dari URL
-    $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+// Mengambil ID koleksi dari URL
+$id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
-    // Mengambil data koleksi berdasarkan ID
-    $query = "SELECT * FROM koleksi WHERE id_koleksi = :id";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(['id' => $id]);
+// Mengambil data koleksi berdasarkan ID
+$query = "SELECT * FROM koleksi WHERE id_koleksi = :id";
+$stmt = $pdo->prepare($query);
+$stmt->execute(['id' => $id]);
 
-    $koleksi = $stmt->fetch();
+$koleksi = $stmt->fetch();
 
-    // Jika koleksi tidak ditemukan
-    if (!$koleksi) {
-        die("Koleksi tidak ditemukan.");
-    }
+// Jika koleksi tidak ditemukan
+if (!$koleksi) {
+    die("Koleksi tidak ditemukan.");
+}
 
-    // Fitur Favorite berdasarkan ID koleksi
-    if (isset($_GET['favorite']) && $_GET['favorite'] === 'toggle') {
+// =====================================
+// FAVORIT TERHUBUNG KE DATABASE
+// =====================================
 
-        // Membuat array favorite jika belum tersedia
-        if (!isset($_SESSION['favorite'])) {
-            $_SESSION['favorite'] = [];
-        }
+$user_id = $_SESSION['user_id'] ?? null;
+$isFavorite = false;
 
-        // Mengubah status favorite
-        if (isset($_SESSION['favorite'][$id])) {
-            unset($_SESSION['favorite'][$id]);
-        } else {
-            $_SESSION['favorite'][$id] = true;
-        }
+// Token keamanan
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
-        // Kembali ke halaman detail koleksi yang sama
-        header("Location: detail_koleksi.php?id=" . $id);
+// Proses tombol Favorite
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST' &&
+    isset($_POST['favorite_action'])
+) {
+    // Pengguna harus login
+    if (!$user_id) {
+        header("Location: login.php");
         exit;
     }
 
-    include 'layout/header.php';
-    ?>
+    // Validasi CSRF
+    $csrf_token = $_POST['csrf_token'] ?? '';
+
+    if (!hash_equals($_SESSION['csrf_token'], $csrf_token)) {
+        die("Permintaan tidak valid.");
+    }
+
+    // Memeriksa apakah koleksi sudah difavoritkan
+    $check = $pdo->prepare("
+        SELECT id_favorit
+        FROM favorit
+        WHERE user_id = :user_id
+          AND id_koleksi = :id_koleksi
+        LIMIT 1
+    ");
+
+    $check->execute([
+        'user_id' => $user_id,
+        'id_koleksi' => $id
+    ]);
+
+    $favoriteData = $check->fetch();
+
+    if ($favoriteData) {
+
+        // Jika sudah ada, hapus dari favorit
+        $delete = $pdo->prepare("
+            DELETE FROM favorit
+            WHERE user_id = :user_id
+              AND id_koleksi = :id_koleksi
+        ");
+
+        $delete->execute([
+            'user_id' => $user_id,
+            'id_koleksi' => $id
+        ]);
+
+    } else {
+
+        // Membuat ID favorit baru
+        $nextId = $pdo->query("
+            SELECT COALESCE(MAX(id_favorit), 0) + 1
+            FROM favorit
+        ")->fetchColumn();
+
+        // Jika belum ada, tambahkan ke favorit
+        $insert = $pdo->prepare("
+            INSERT INTO favorit
+            (id_favorit, user_id, id_koleksi, tanggal_favorit)
+            VALUES
+            (:id_favorit, :user_id, :id_koleksi, NOW())
+        ");
+
+        $insert->execute([
+            'id_favorit' => $nextId,
+            'user_id' => $user_id,
+            'id_koleksi' => $id
+        ]);
+    }
+
+    // Kembali ke halaman detail koleksi
+    header("Location: detail_koleksi.php?id=" . $id);
+    exit;
+}
+
+// Memeriksa status favorit pengguna
+if ($user_id) {
+
+    $checkFavorite = $pdo->prepare("
+        SELECT id_favorit
+        FROM favorit
+        WHERE user_id = :user_id
+          AND id_koleksi = :id_koleksi
+        LIMIT 1
+    ");
+
+    $checkFavorite->execute([
+        'user_id' => $user_id,
+        'id_koleksi' => $id
+    ]);
+
+    $isFavorite = (bool) $checkFavorite->fetch();
+}
+
+include 'layout/header.php';
+?>
 <style>
 
 /*MAIN CONTENT*/
@@ -239,18 +328,35 @@ h4{
 
             <a href="#" id="shareButton">[Share]</a>
 
-            <a
-                href="detail_koleksi.php?id=<?= $id ?>&favorite=toggle"
-                class="favorite-btn"
-            >
+                <?php if ($user_id): ?>
 
-                <?php
-                echo isset($_SESSION['favorite'][$id])
-                    ? '[♥ Favorite]'
-                    : '[♡ Favorite]';
-                ?>
+                    <form method="POST" action="detail_koleksi.php?id=<?= (int) $id ?>" style="display:inline;">
 
-            </a>
+                        <input
+                            type="hidden"
+                            name="csrf_token"
+                            value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>"
+                        >
+
+                        <button
+                            type="submit"
+                            name="favorite_action"
+                            value="toggle"
+                            class="favorite-btn"
+                            style="border:none; background:none; font:inherit; cursor:pointer;"
+                        >
+                            <?= $isFavorite ? '[♥ Favorite]' : '[♡ Favorite]' ?>
+                        </button>
+
+                    </form>
+
+                <?php else: ?>
+
+                    <a href="login.php" class="favorite-btn">
+                        [♡ Login to Favorite]
+                    </a>
+
+                <?php endif; ?>
 
         </div>
 

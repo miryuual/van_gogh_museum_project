@@ -1,6 +1,6 @@
         <?php
         $host = "localhost";
-        $dbname = "van_gogh_museum";
+        $dbname = "db_glam_vgmuseum";
         $username = "vangogh";
         $password = "vangogh00";
 

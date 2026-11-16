@@ -88,8 +88,8 @@ body {
     overflow: hidden;
     border: 1px solid #c8ced3;
     border-radius: 5px;
-    background: #c7c9ca;
-    color: #fff;
+    background: #f2ff00;
+    color: #000000;
 }
 
 .profile-avatar span {
@@ -248,8 +248,8 @@ body {
 }
 
 .dashboard-tabs a:hover {
-    background: #eef6ff;
-    color: #075fbd;
+    background: #f9d71c;
+    color: #000000;
 }
 
 .dashboard-tabs a.active {
@@ -362,14 +362,14 @@ body {
 
 .section-heading-row h3 {
     margin: 0;
-    color: #293944;
+    color: #000000;
     font-size: 18px;
     font-weight: 600;
 }
 
 .section-heading-row > a,
 .table-link {
-    color: #344f60;
+    color: #000000;
     font-size: 13px;
     text-decoration: underline;
 }
@@ -405,7 +405,7 @@ body {
 
 .dashboard-table thead th {
     background: #f0f2f3;
-    color: #344f60;
+    color: #000000;
     font-weight: 600;
 }
 
@@ -414,13 +414,13 @@ body {
 }
 
 .dashboard-table tbody tr:hover {
-    background: #fff9d9;
+    background: #f9d71c;
 }
 
 .status-pill {
     display: inline-block;
     padding: 5px 9px;
-    background: #fff3ad;
+    background: #f9d71c;
     color: #5d4b00;
     font-size: 12px;
 }

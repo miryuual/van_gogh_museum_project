@@ -143,11 +143,27 @@ $nama_tiket = [
 ];
 
 // =====================================
-// Favorit
+// FAVORIT PENGGUNA
 // =====================================
 
-// Belum dihubungkan karena tabel favorit belum tersedia.
-$savedCollections = [];
+$query_favorit = "
+    SELECT
+        k.id_koleksi,
+        k.judul_koleksi AS title,
+        k.tahun_pembuatan AS year,
+        k.jenis_koleksi AS type,
+        k.gambar_koleksi,
+        f.tanggal_favorit
+    FROM favorit f
+    INNER JOIN koleksi k
+        ON f.id_koleksi = k.id_koleksi
+    WHERE f.user_id = :user_id
+    ORDER BY f.tanggal_favorit DESC
+";
+
+$stmt_favorit = $pdo->prepare($query_favorit);
+$stmt_favorit->execute(['user_id' => $user_id]);
+$savedCollections = $stmt_favorit->fetchAll(PDO::FETCH_ASSOC);
 
 // =====================================
 // MENENTUKAN TAB
@@ -280,7 +296,7 @@ $cancelError = isset($_GET['cancel_error']);
         }
 
         .account-information span {
-            color: #666666;
+            color: #666666;-5
         }
 
         .account-information strong {
@@ -483,7 +499,7 @@ $cancelError = isset($_GET['cancel_error']);
 
                                             <td>
                                                 <?= htmlspecialchars(
-                                                    $collection['year'],
+                                                    $collection['year'] ?? '-',
                                                     ENT_QUOTES,
                                                     'UTF-8'
                                                 ) ?>
@@ -498,10 +514,7 @@ $cancelError = isset($_GET['cancel_error']);
                                             </td>
 
                                             <td>
-                                                <a
-                                                    href="collection.php"
-                                                    class="table-link"
-                                                >
+                                                <a href="detail_koleksi.php?id=<?= (int) $collection['id_koleksi'] ?>">
                                                     Buka koleksi
                                                 </a>
                                             </td>
