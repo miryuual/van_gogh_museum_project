@@ -1,5 +1,5 @@
 <?php
-require_once 'koneksi.php';
+require_once 'config/config.php';
 include 'layout/header.php';
 
 // Mengambil kata kunci pencarian

@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once 'koneksi.php';
+require_once 'config/config.php';
 
 // Pastikan pengguna sudah login
 if (!isset($_SESSION['user_id'])) {

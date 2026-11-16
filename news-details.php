@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-include 'koneksi.php';
+include 'config/config.php';
 
 // Mengambil ID berita dari URL
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;

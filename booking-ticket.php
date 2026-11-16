@@ -10,7 +10,7 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 // Koneksi database
-require_once 'koneksi.php';
+require_once 'config/config.php';
 
 // Mengambil data akun pengunjung yang sedang login
 $user_id = $_SESSION["user_id"];

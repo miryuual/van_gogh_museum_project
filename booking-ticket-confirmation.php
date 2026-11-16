@@ -10,7 +10,7 @@ if (!isset($_SESSION["user_id"])) {
 }
 
 // Koneksi database
-require_once 'koneksi.php';
+require_once 'config/config.php';
 
 // Halaman hanya menerima data dari formulir
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {

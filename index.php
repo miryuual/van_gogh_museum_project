@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once 'koneksi.php';
+require_once 'config/config.php';
 
 // Mengambil 3 berita terbaru yang sudah dipublikasikan
 $sqlBerita = "
@@ -52,7 +52,7 @@ $popularCollections = $stmtKoleksi->fetchAll();
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
     <!--CSS-->
-        <link rel="stylesheet" href="home_CSS.css">
+        <link rel="stylesheet" href="css/home_CSS.css">
     
 </head>
 

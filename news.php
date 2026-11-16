@@ -3,7 +3,7 @@
         <?php
         session_start();
 
-        include 'koneksi.php';
+        include 'config/config.php';
         include 'layout/header.php';
 
         // Mengambil berita yang sudah dipublikasikan

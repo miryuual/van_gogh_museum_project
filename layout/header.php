@@ -17,7 +17,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
 
     <!--CSS-->
-        <link rel="stylesheet" href="General_CSS.css">
+        <link rel="stylesheet" href="css/General_CSS.css">
 </head>
 
 <body>

@@ -3,7 +3,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once 'koneksi.php';
+require_once 'config/config.php';
 
 // Mengambil ID koleksi dari URL
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
