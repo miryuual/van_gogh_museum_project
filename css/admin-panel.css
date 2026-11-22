@@ -88,7 +88,7 @@ body.admin-page {
     height: 30px;
 
     border-radius: 50%;
-    background: #e1e4e6;
+    background: #6e6e6e;
     color: #555;
 }
 
@@ -127,11 +127,11 @@ body.admin-page {
     padding: 13px 16px;
 
     background: #F9D71C;
-    border-top: 1px solid #a79fb9;
-    border-bottom: 1px solid #a79fb9;
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid #000000;
 
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 900;
     letter-spacing: .5px;
 }
 
@@ -150,7 +150,7 @@ body.admin-page {
 
     color: #171717;
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 600;
     text-decoration: none;
 
     border-left: 3px solid transparent;
@@ -207,6 +207,29 @@ body.admin-page {
     border-radius: 7px;
 }
 
+/* LOGO SIDEBAR ADMIN */
+.admin-sidebar-logo {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 25px 15px 20px;
+}
+
+.admin-sidebar-logo img {
+    display: block;
+    width: 200px;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* MENU SIDEBAR TANPA IKON */
+.admin-menu-link {
+    display: flex;
+    align-items: center;
+    padding: 13px 20px;
+}
 
 /* ==================================================
    PAGE HEADING
@@ -257,7 +280,7 @@ body.admin-page {
     margin: 0 0 25px;
     padding: 0 0 22px;
 
-    border-bottom: 1px solid #d8d8d8;
+    border-bottom: 1px solid #000000;
 }
 
 .admin-panel-title {
@@ -309,14 +332,11 @@ body.admin-page {
     text-decoration: none;
 
     background: #fff;
-    border: 1px solid #d6d6d6;
-    border-top: 4px solid #F9D71C;
+    border: 1px solid #000000;
+    border-top: 4px solid #000000;
     border-radius: 4px;
 }
 
-.admin-stat:hover {
-    background: #fffbea;
-}
 
 .admin-stat span {
     color: #555;
@@ -356,12 +376,10 @@ body.admin-page {
     color: #171717;
     text-decoration: none;
 
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #000000;
 }
 
-.admin-shortcuts a:hover {
-    background: #fff9d9;
-}
+
 
 .admin-shortcuts a > span {
     width: 26px;
@@ -403,7 +421,7 @@ body.admin-page {
     margin: 0 0 17px;
     padding: 11px 14px;
 
-    border: 1px solid #d9c65a;
+    border: 1px solid #000000;
     background: #fff7ce;
     color: #51440c;
 
@@ -422,8 +440,9 @@ body.admin-page {
 }
 
 .admin-alert-warning {
-    border-color: #d9c65a;
-    background: #fff7ce;
+    border-color: #ff0000;
+    background: #ff0000;
+    color: #fff;
 }
 
 
@@ -435,7 +454,7 @@ body.admin-page {
     padding: 18px;
 
     background: #fafafa;
-    border: 1px solid #dedede;
+    border: 1px solid #000000;
     border-radius: 4px;
 }
 
@@ -468,7 +487,7 @@ body.admin-page {
     min-height: 42px;
     padding: 9px 10px;
 
-    border: 1px solid #bcbcbc;
+    border: 1px solid #000000;
     border-radius: 3px;
 
     background: #fff;
@@ -624,10 +643,6 @@ body.admin-page {
     vertical-align: middle;
 }
 
-.admin-table tbody tr:hover {
-    background: #fffdf1;
-}
-
 .admin-table td strong {
     font-weight: 500;
 }
@@ -691,9 +706,7 @@ body.admin-page {
     cursor: pointer;
 }
 
-.admin-link-danger:hover {
-    background: #fff0ee;
-}
+
 
 
 /* ==================================================

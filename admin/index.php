@@ -238,45 +238,36 @@ admin_start(
     <div class="admin-shortcuts">
 
         <a href="koleksi-admin.php">
-            <span>▧</span>
             <div>
                 <strong>Kelola Koleksi</strong>
                 <small>Input dan perbarui data karya museum</small>
             </div>
-            <b>→</b>
         </a>
 
         <a href="tiket-admin.php">
-            <span>▣</span>
             <div>
                 <strong>Booking & Verifikasi Tiket</strong>
                 <small>Periksa pembayaran dan status kunjungan</small>
             </div>
-            <b>→</b>
         </a>
 
         <a href="berita-admin.php">
-            <span>▤</span>
             <div>
                 <strong>Kelola Berita</strong>
                 <small>Tambah berita dan atur publikasi</small>
             </div>
-            <b>→</b>
         </a>
 
         <a href="pengguna-admin.php">
-            <span>♙</span>
             <div>
                 <strong>Data Pengguna</strong>
                 <small>Lihat dan perbarui informasi akun</small>
             </div>
-            <b>→</b>
         </a>
 
     </div>
 
 </section>
-
 
 <section class="admin-panel">
 

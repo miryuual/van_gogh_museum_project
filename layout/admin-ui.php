@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 */
 
 if (empty($_SESSION['admin_id'])) {
-    header("Location: /van_gogh_museum/login.php");
+    header("Location: /van_gogh_museum/auth/login.php");
     exit;
 }
 
@@ -63,11 +63,11 @@ function admin_start(string $active, string $title, string $description = ''): v
     $name = $_SESSION['admin_name'] ?? $_SESSION['username'] ?? 'Administrator';
 
     $menu = [
-        'dashboard' => ['index.php', 'Dashboard', '⌂'],
-        'koleksi' => ['koleksi-admin.php', 'Kelola Koleksi', '▧'],
-        'tiket' => ['tiket-admin.php', 'Booking Tiket', '▣'],
-        'berita' => ['berita-admin.php', 'Kelola Berita', '▤'],
-        'pengguna' => ['pengguna-admin.php', 'Data Pengguna', '♙'],
+        'dashboard' => ['index.php', 'Dashboard'],
+        'koleksi' => ['koleksi-admin.php', 'Kelola Koleksi'],
+        'tiket' => ['tiket-admin.php', 'Booking Tiket'],
+        'berita' => ['berita-admin.php', 'Kelola Berita'],
+        'pengguna' => ['pengguna-admin.php', 'Data Pengguna'],
     ];
 
     ?>
@@ -96,17 +96,20 @@ function admin_start(string $active, string $title, string $description = ''): v
 
     <header class="admin-topbar">
 
-        <a class="admin-brand" href="index.php">
+        <a class="admin-brand" href="/van_gogh_museum/admin/index.php">
             <span>Van Gogh Museum</span>
         </a>
 
         <div class="admin-topbar-right">
-            <span class="admin-topbar-label">ADMINISTRATION</span>
+
+            <span class="admin-topbar-label">
+                ADMINISTRATION
+            </span>
 
             <span class="admin-user">
-                <span class="admin-user-icon">♙</span>
                 <?= admin_e($name) ?>
             </span>
+
         </div>
 
     </header>
@@ -115,10 +118,21 @@ function admin_start(string $active, string $title, string $description = ''): v
 
         <aside class="admin-sidebar">
 
+            <!-- LOGO SIDEBAR -->
+            <div class="admin-sidebar-logo">
+
+                <img
+                    src="/van_gogh_museum/assets/logo/Logo_-_Van_Gogh_Museum.png"
+                    alt="Van Gogh Museum Logo"
+                >
+
+            </div>
+
             <div class="admin-sidebar-heading">
                 PENGELOLAAN MUSEUM
             </div>
 
+            <!-- MENU SIDEBAR -->
             <nav class="admin-menu">
 
                 <?php foreach ($menu as $key => $item): ?>
@@ -127,10 +141,6 @@ function admin_start(string $active, string $title, string $description = ''): v
                         class="admin-menu-link <?= $active === $key ? 'is-active' : '' ?>"
                         href="<?= admin_e($item[0]) ?>"
                     >
-                        <span class="admin-menu-icon">
-                            <?= admin_e($item[2]) ?>
-                        </span>
-
                         <span>
                             <?= admin_e($item[1]) ?>
                         </span>
@@ -140,14 +150,21 @@ function admin_start(string $active, string $title, string $description = ''): v
 
             </nav>
 
+            <!-- MENU BAGIAN BAWAH -->
             <div class="admin-sidebar-bottom">
 
-                <a href="/van_gogh_museum/index.php" class="admin-side-secondary">
-                    ↗ Lihat Website
+                <a
+                    href="/van_gogh_museum/index.php"
+                    class="admin-side-secondary"
+                >
+                    Lihat Website
                 </a>
 
-                <a href="../auth/log-out.php" class="admin-side-secondary">
-                    ⇥ Keluar
+                <a
+                    href="/van_gogh_museum/auth/log-out.php"
+                    class="admin-side-secondary"
+                >
+                    Keluar
                 </a>
 
             </div>
