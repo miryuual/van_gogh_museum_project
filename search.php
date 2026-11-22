@@ -18,37 +18,37 @@ $halaman = [
     [
         'judul' => 'Biography',
         'deskripsi' => 'Discover the life, background, journey, and artistic development of Vincent van Gogh.',
-        'url' => 'biography.php',
+        'url' => 'page/museum/biography.php',
         'kategori' => 'Website Page'
     ],
     [
-        'judul' => 'Collection',
+        'judul' => 'koleksi',
         'deskripsi' => 'Explore paintings, drawings, prints, and letters by Vincent van Gogh.',
-        'url' => 'collection.php',
+        'url' => 'page/koleksi/koleksi.php',
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'News',
         'deskripsi' => 'Read the latest news and announcements from Van Gogh Museum.',
-        'url' => 'news.php',
+        'url' => 'page//news/news.php',
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'About Us',
         'deskripsi' => 'Learn about the museum history, collection, research, and museum building.',
-        'url' => 'About Us.php',
+        'url' => 'page/museum/about-us.php',
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'Privacy Policy',
         'deskripsi' => 'Information about privacy policy and visitor data.',
-        'url' => 'privacy-policy.php',
+        'url' => 'page/museum/privacy-policy.php',
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'Ticket and Ticket Prices',
         'deskripsi' => 'Find information about museum tickets and admission prices.',
-        'url' => 'ticket-ticketprice.php',
+        'url' => 'page/ticket/ticket-price.php',
         'kategori' => 'Website Page'
     ]
 ];
@@ -77,7 +77,7 @@ if ($keyword !== '') {
             judul_koleksi AS judul,
             deskripsi AS deskripsi,
             'Collection' AS kategori,
-            CONCAT('detail_koleksi.php?id=', id_koleksi) AS url
+            CONCAT('page/koleksi/detail_koleksi.php?id=', id_koleksi) AS url
         FROM koleksi
         WHERE judul_koleksi LIKE :judul
            OR seniman LIKE :artis
