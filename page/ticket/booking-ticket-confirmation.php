@@ -1,16 +1,23 @@
+
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Menentukan alamat dasar proyek secara otomatis
+$base_url = rtrim(
+    dirname(dirname(dirname($_SERVER['SCRIPT_NAME']))),
+    '/'
+);
+
 // Pastikan pengunjung sudah login
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+    header("Location: " . $base_url . "/auth/login.php");
     exit;
 }
 
 // Koneksi database
-require_once '../../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 
 // Halaman hanya menerima data dari formulir
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
@@ -18,16 +25,18 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
-$user_id = $_SESSION["user_id"];
+$user_id = (int) $_SESSION["user_id"];
 
 // Mengambil data dari formulir
 $tanggal_kunjungan = $_POST["visit-date"] ?? "";
 $waktu_kunjungan = $_POST["visit-time"] ?? "";
 $jenis_tiket = $_POST["ticket-type"] ?? "";
+
 $jumlah_tiket = filter_var(
     $_POST["quantity"] ?? 0,
     FILTER_VALIDATE_INT
 );
+
 $nama_pengunjung = trim($_POST["name"] ?? "");
 $email = trim($_POST["email"] ?? "");
 $no_telepon = trim($_POST["phone"] ?? "");
@@ -125,9 +134,14 @@ $kurs_euro = 18000;
 
 $total_rupiah = round($total_harga * $kurs_euro);
 
+// Mengaktifkan pelaporan error MySQLi
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
 // Menyimpan data booking dan pembayaran
 try {
-    $pdo->beginTransaction();
+
+    // Memulai transaksi database
+    mysqli_begin_transaction($conn);
 
     // Insert data booking
     $query_booking = "
@@ -148,45 +162,38 @@ try {
             newsletter,
             status_booking
         ) VALUES (
-            :user_id,
-            :tanggal_kunjungan,
-            :waktu_kunjungan,
-            :jenis_tiket,
-            :jumlah_tiket,
-            :nama_pengunjung,
-            :email,
-            :no_telepon,
-            :harga_satuan,
-            :total_harga,
-            :kurs_euro,
-            :total_rupiah,
-            :audio_guide,
-            :newsletter,
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
             'Pending'
         )
     ";
 
-    $stmt_booking = $pdo->prepare($query_booking);
+    $stmt_booking = mysqli_prepare($conn, $query_booking);
 
-    $stmt_booking->execute([
-        ':user_id' => $user_id,
-        ':tanggal_kunjungan' => $tanggal_kunjungan,
-        ':waktu_kunjungan' => $waktu_kunjungan,
-        ':jenis_tiket' => $jenis_tiket,
-        ':jumlah_tiket' => $jumlah_tiket,
-        ':nama_pengunjung' => $nama_pengunjung,
-        ':email' => $email,
-        ':no_telepon' => $no_telepon,
-        ':harga_satuan' => $harga_satuan,
-        ':total_harga' => $total_harga,
-        ':kurs_euro' => $kurs_euro,
-        ':total_rupiah' => $total_rupiah,
-        ':audio_guide' => $audio_guide,
-        ':newsletter' => $newsletter
-    ]);
+    mysqli_stmt_bind_param(
+        $stmt_booking,
+        "isssisssddiiii",
+        $user_id,
+        $tanggal_kunjungan,
+        $waktu_kunjungan,
+        $jenis_tiket,
+        $jumlah_tiket,
+        $nama_pengunjung,
+        $email,
+        $no_telepon,
+        $harga_satuan,
+        $total_harga,
+        $kurs_euro,
+        $total_rupiah,
+        $audio_guide,
+        $newsletter
+    );
+
+    mysqli_stmt_execute($stmt_booking);
 
     // Mengambil ID booking yang baru dibuat
-    $id_booking = $pdo->lastInsertId();
+    $id_booking = mysqli_insert_id($conn);
+
+    mysqli_stmt_close($stmt_booking);
 
     // Insert data pembayaran
     $query_pembayaran = "
@@ -196,22 +203,28 @@ try {
             nominal_pembayaran,
             status_pembayaran
         ) VALUES (
-            :id_booking,
+            ?,
             'QRIS',
-            :nominal_pembayaran,
+            ?,
             'Belum Dibayar'
         )
     ";
 
-    $stmt_pembayaran = $pdo->prepare($query_pembayaran);
+    $stmt_pembayaran = mysqli_prepare($conn, $query_pembayaran);
 
-    $stmt_pembayaran->execute([
-        ':id_booking' => $id_booking,
-        ':nominal_pembayaran' => $total_rupiah
-    ]);
+    mysqli_stmt_bind_param(
+        $stmt_pembayaran,
+        "ii",
+        $id_booking,
+        $total_rupiah
+    );
+
+    mysqli_stmt_execute($stmt_pembayaran);
+
+    mysqli_stmt_close($stmt_pembayaran);
 
     // Menyimpan seluruh transaksi
-    $pdo->commit();
+    mysqli_commit($conn);
 
     // Mengambil kembali data booking
     $query_detail = "
@@ -223,27 +236,39 @@ try {
         FROM booking_tiket b
         INNER JOIN pembayaran p
             ON b.id_booking = p.id_booking
-        WHERE b.id_booking = :id_booking
-        AND b.user_id = :user_id
+        WHERE b.id_booking = ?
+        AND b.user_id = ?
     ";
 
-    $stmt_detail = $pdo->prepare($query_detail);
+    $stmt_detail = mysqli_prepare($conn, $query_detail);
 
-    $stmt_detail->execute([
-        ':id_booking' => $id_booking,
-        ':user_id' => $user_id
-    ]);
+    mysqli_stmt_bind_param(
+        $stmt_detail,
+        "ii",
+        $id_booking,
+        $user_id
+    );
 
-    $booking = $stmt_detail->fetch();
+    mysqli_stmt_execute($stmt_detail);
+
+    // Mengambil hasil query
+    $result_detail = mysqli_stmt_get_result($stmt_detail);
+
+    $booking = mysqli_fetch_assoc($result_detail);
+
+    mysqli_stmt_close($stmt_detail);
 
     if (!$booking) {
         die("Booking information could not be found.");
     }
 
-} catch (PDOException $e) {
+} catch (Throwable $e) {
 
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
+    // Membatalkan transaksi jika terjadi kegagalan
+    try {
+        mysqli_rollback($conn);
+    } catch (Throwable $rollback_error) {
+        // Menghindari error tambahan saat rollback
     }
 
     die(
@@ -301,7 +326,8 @@ function aman($data) {
     );
 }
 
-    include '../../layout/header.php';?>
+include __DIR__ . '/../../layout/header.php';
+?>
 
 <style>
     /* SUBTITLE */
@@ -453,7 +479,7 @@ function aman($data) {
 <div class="body-layout">
 
     <!-- NAVIGASI -->
-     <?php include '../../layout/navigasi.php';?>
+    <?php include __DIR__ . '/../../layout/navigasi.php'; ?>
 
     <!-- MAIN CONTENT -->
     <main>
@@ -621,7 +647,7 @@ function aman($data) {
 
             <?php endif; ?>
 
-            <a href="/van_gogh_museum/index.php">
+            <a href="<?= aman($base_url); ?>/index.php">
                 Back to Home
             </a>
 

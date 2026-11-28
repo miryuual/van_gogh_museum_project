@@ -5,14 +5,14 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Memeriksa apakah pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit;
 }
 
 // Koneksi database
 require_once __DIR__ . '/../config/config.php';
 
-$user_id = $_SESSION['user_id'];
+$user_id = (int) $_SESSION['user_id'];
 
 // Membuat token keamanan untuk formulir pembatalan
 if (empty($_SESSION['csrf_token'])) {
@@ -25,17 +25,19 @@ $query_user = "
            birthdate, gender, preferred_language,
            collection_interests, created_at
     FROM users
-    WHERE user_id = :user_id
+    WHERE user_id = ?
     LIMIT 1
 ";
 
-$stmt_user = $pdo->prepare($query_user);
-$stmt_user->execute(['user_id' => $user_id]);
-$user = $stmt_user->fetch();
+$stmt_user = $conn->prepare($query_user);
+$stmt_user->bind_param('i', $user_id);
+$stmt_user->execute();
+$user = $stmt_user->get_result()->fetch_assoc();
+$stmt_user->close();
 
 if (!$user) {
     session_destroy();
-    header("Location: login.php");
+    header("Location: ../auth/login.php");
     exit;
 }
 
@@ -73,20 +75,20 @@ if (
             INNER JOIN pembayaran p
                 ON b.id_booking = p.id_booking
             SET b.status_booking = 'Cancelled'
-            WHERE b.id_booking = :id_booking
-              AND b.user_id = :user_id
+            WHERE b.id_booking = ?
+              AND b.user_id = ?
               AND b.status_booking = 'Pending'
               AND p.status_pembayaran = 'Belum Dibayar'
         ";
 
-        $stmt_cancel = $pdo->prepare($query_cancel);
+        $stmt_cancel = $conn->prepare($query_cancel);
+        $stmt_cancel->bind_param('ii', $id_booking, $user_id);
+        $stmt_cancel->execute();
 
-        $stmt_cancel->execute([
-            'id_booking' => $id_booking,
-            'user_id' => $user_id
-        ]);
+        $jumlah_dibatalkan = $stmt_cancel->affected_rows;
+        $stmt_cancel->close();
 
-        if ($stmt_cancel->rowCount() > 0) {
+        if ($jumlah_dibatalkan > 0) {
             header("Location: dashboard-user.php?tab=tickets&cancelled=1");
             exit;
         } else {
@@ -94,7 +96,7 @@ if (
             exit;
         }
 
-    } catch (PDOException $e) {
+    } catch (mysqli_sql_exception $e) {
         error_log($e->getMessage());
         die("Pembatalan tiket gagal diproses.");
     }
@@ -120,14 +122,16 @@ $query_tickets = "
     FROM booking_tiket b
     INNER JOIN pembayaran p
         ON b.id_booking = p.id_booking
-    WHERE b.user_id = :user_id
+    WHERE b.user_id = ?
       AND b.status_booking <> 'Cancelled'
     ORDER BY b.created_at DESC
 ";
 
-$stmt_tickets = $pdo->prepare($query_tickets);
-$stmt_tickets->execute(['user_id' => $user_id]);
-$activeTickets = $stmt_tickets->fetchAll();
+$stmt_tickets = $conn->prepare($query_tickets);
+$stmt_tickets->bind_param('i', $user_id);
+$stmt_tickets->execute();
+$activeTickets = $stmt_tickets->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt_tickets->close();
 
 // Daftar nama tiket
 $nama_tiket = [
@@ -157,13 +161,15 @@ $query_favorit = "
     FROM favorit f
     INNER JOIN koleksi k
         ON f.id_koleksi = k.id_koleksi
-    WHERE f.user_id = :user_id
+    WHERE f.user_id = ?
     ORDER BY f.tanggal_favorit DESC
 ";
 
-$stmt_favorit = $pdo->prepare($query_favorit);
-$stmt_favorit->execute(['user_id' => $user_id]);
-$savedCollections = $stmt_favorit->fetchAll(PDO::FETCH_ASSOC);
+$stmt_favorit = $conn->prepare($query_favorit);
+$stmt_favorit->bind_param('i', $user_id);
+$stmt_favorit->execute();
+$savedCollections = $stmt_favorit->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt_favorit->close();
 
 // =====================================
 // MENENTUKAN TAB
@@ -193,9 +199,17 @@ $cancelError = isset($_GET['cancel_error']);
 <head>
     <?php include __DIR__ . '/../layout/header.php';?>
     
-    <link rel="stylesheet" href="dashboard-user.css">
+    <link rel="stylesheet" href="../css/dashboard-user.css">
 
     <style>
+
+        /* BACKGROUND HALAMAN */
+        .user-dashboard-page {
+            background-image: url("/van_gogh_museum/assets/images/background/Vangogh-Museum Entrance-D.jpg");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
 
         /* PESAN PEMBATALAN */
         .dashboard-message {
@@ -219,7 +233,6 @@ $cancelError = isset($_GET['cancel_error']);
             display: inline-block;
             padding: 5px 10px;
             border-radius: 20px;
-            font-size: 12px;
             background: #eeeeee;
             color: #333333;
         }
@@ -282,7 +295,7 @@ $cancelError = isset($_GET['cancel_error']);
         }
 
         .account-information span {
-            color: #666666;-5
+            color: #666666;
         }
 
         .account-information strong {
@@ -336,11 +349,11 @@ $cancelError = isset($_GET['cancel_error']);
 
             </div>
 
-            <a class="sidebar-primary-button" href="index.php">
+            <a class="sidebar-primary-button" href="../index.php">
                 Home
             </a>
 
-            <a class="sidebar-logout-button" href="<?= '/van_gogh_museum/log-out.php' ?>">
+            <a class="sidebar-logout-button" href="../auth/log-out.php">
                 <span aria-hidden="true">⇥</span>
                 Keluar
             </a>
@@ -478,7 +491,7 @@ $cancelError = isset($_GET['cancel_error']);
 
                                             <td>
                                                 <?= htmlspecialchars(
-                                                    $collection['year'] ?? '-',
+                                                    (string) ($collection['year'] ?? '-'),
                                                     ENT_QUOTES,
                                                     'UTF-8'
                                                 ) ?>
@@ -493,7 +506,7 @@ $cancelError = isset($_GET['cancel_error']);
                                             </td>
 
                                             <td>
-                                                <a href="detail_koleksi.php?id=<?= (int) $collection['id_koleksi'] ?>">
+                                                <a href="../page/koleksi/detail_koleksi.php?id=<?= (int) $collection['id_koleksi'] ?>">
                                                     Buka koleksi
                                                 </a>
                                             </td>
@@ -567,7 +580,7 @@ $cancelError = isset($_GET['cancel_error']);
                                                 strtotime($ticket['created_at'])
                                             ) . '-' .
                                             str_pad(
-                                                $ticket['id_booking'],
+                                                (string) $ticket['id_booking'],
                                                 4,
                                                 '0',
                                                 STR_PAD_LEFT
@@ -657,7 +670,7 @@ $cancelError = isset($_GET['cancel_error']);
                                                         <a
                                                             class="ticket-cancel-button"
                                                             style="background: #00bc32;"
-                                                            href="payment.php?id=<?= (int) $ticket['id_booking']; ?>"
+                                                            href="../page/ticket/payment.php?id=<?= (int) $ticket['id_booking']; ?>"
                                                         >
                                                             Lanjutkan Pembayaran
                                                         </a>
@@ -700,7 +713,7 @@ $cancelError = isset($_GET['cancel_error']);
                                                         <!-- DETAIL UNTUK STATUS LAIN -->
                                                         <a
                                                             class="ticket-view-link"
-                                                            href="payment.php?id=<?= (int) $ticket['id_booking']; ?>"
+                                                            href="../page/ticket/payment.php?id=<?= (int) $ticket['id_booking']; ?>"
                                                         >
                                                             Detail
                                                         </a>
@@ -741,7 +754,7 @@ $cancelError = isset($_GET['cancel_error']);
                     <?php endif; ?>
 
                     <a
-                        href="booking-ticket.php"
+                        href="../page/ticket/booking-ticket.php"
                         class="dashboard-action-button"
                     >
                         Pesan tiket
@@ -786,7 +799,7 @@ $cancelError = isset($_GET['cancel_error']);
                                                 strtotime($ticket['created_at'])
                                             ) . '-' .
                                             str_pad(
-                                                $ticket['id_booking'],
+                                                (string) $ticket['id_booking'],
                                                 4,
                                                 '0',
                                                 STR_PAD_LEFT
@@ -887,7 +900,7 @@ $cancelError = isset($_GET['cancel_error']);
 
                         <div>
                             <span>Nama Lengkap</span>
-                            
+                            <strong>
                                 <?= htmlspecialchars(
                                     $user['full_name'],
                                     ENT_QUOTES,
@@ -922,7 +935,7 @@ $cancelError = isset($_GET['cancel_error']);
                             <span>Kode Pengguna</span>
                             <strong>
                                 <?= htmlspecialchars(
-                                    $user['kode_user'],
+                                    (string) $user['kode_user'],
                                     ENT_QUOTES,
                                     'UTF-8'
                                 ) ?>

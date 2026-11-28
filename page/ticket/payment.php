@@ -1,24 +1,32 @@
+
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once '../../config/config.php';
+// Menentukan alamat dasar proyek secara otomatis
+$base_url = rtrim(
+    dirname(dirname(dirname($_SERVER['SCRIPT_NAME']))),
+    '/'
+);
 
 // Pastikan pengguna sudah login
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: " . $base_url . "/auth/login.php");
     exit;
 }
 
-$user_id = $_SESSION['user_id'];
+// Koneksi database
+require_once __DIR__ . '/../../config/config.php';
+
+$user_id = (int) $_SESSION['user_id'];
 $id_booking = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$id_booking || $id_booking < 1) {
     die("ID booking tidak valid.");
 }
 
-// Ambil data booking dan pembayaran milik pengguna yang sedang login
+// Mengambil data booking dan pembayaran milik pengguna yang sedang login
 $query = "SELECT
             b.*,
             p.id_pembayaran,
@@ -30,17 +38,25 @@ $query = "SELECT
           FROM booking_tiket b
           INNER JOIN pembayaran p
             ON b.id_booking = p.id_booking
-          WHERE b.id_booking = :id_booking
-            AND b.user_id = :user_id
+          WHERE b.id_booking = ?
+            AND b.user_id = ?
           LIMIT 1";
 
-$stmt = $pdo->prepare($query);
-$stmt->execute([
-    'id_booking' => $id_booking,
-    'user_id' => $user_id
-]);
+$stmt = mysqli_prepare($conn, $query);
 
-$booking = $stmt->fetch();
+mysqli_stmt_bind_param(
+    $stmt,
+    "ii",
+    $id_booking,
+    $user_id
+);
+
+mysqli_stmt_execute($stmt);
+
+$result = mysqli_stmt_get_result($stmt);
+$booking = mysqli_fetch_assoc($result);
+
+mysqli_stmt_close($stmt);
 
 if (!$booking) {
     die("Data booking tidak ditemukan.");
@@ -125,23 +141,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (move_uploaded_file($file['tmp_name'], $lokasi_file)) {
 
                     try {
-                        $update = $pdo->prepare(
+                        $update = mysqli_prepare(
+                            $conn,
                             "UPDATE pembayaran
-                             SET bukti_pembayaran = :bukti,
+                             SET bukti_pembayaran = ?,
                                  status_pembayaran = 'Menunggu Verifikasi',
                                  tanggal_pembayaran = NOW()
-                             WHERE id_booking = :id_booking"
+                             WHERE id_booking = ?"
                         );
 
-                        $update->execute([
-                            'bukti' => 'uploads/bukti-pembayaran/' . $nama_file,
-                            'id_booking' => $id_booking
-                        ]);
+                        $path_bukti = 'uploads/bukti-pembayaran/' . $nama_file;
 
-                        header("Location: payment.php?id=" . $id_booking . "&uploaded=1");
+                        mysqli_stmt_bind_param(
+                            $update,
+                            "si",
+                            $path_bukti,
+                            $id_booking
+                        );
+
+                        mysqli_stmt_execute($update);
+                        mysqli_stmt_close($update);
+
+                        header(
+                            "Location: payment.php?id=" .
+                            $id_booking .
+                            "&uploaded=1"
+                        );
                         exit;
 
-                    } catch (PDOException $e) {
+                    } catch (Throwable $e) {
                         if (file_exists($lokasi_file)) {
                             unlink($lokasi_file);
                         }
@@ -165,12 +193,27 @@ if (isset($_GET['uploaded']) && $_GET['uploaded'] == '1') {
     $jenis_pesan = "success";
 
     // Ambil ulang status pembayaran setelah upload
-    $stmt->execute([
-        'id_booking' => $id_booking,
-        'user_id' => $user_id
-    ]);
+    $stmt = mysqli_prepare($conn, $query);
 
-    $booking = $stmt->fetch();
+    mysqli_stmt_bind_param(
+        $stmt,
+        "ii",
+        $id_booking,
+        $user_id
+    );
+
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+    $booking = mysqli_fetch_assoc($result);
+
+    mysqli_stmt_close($stmt);
+
+    if (!$booking) {
+        die("Data booking tidak ditemukan.");
+    }
+
+    $jenis_tiket = $nama_tiket[$booking['jenis_tiket']] ?? $booking['jenis_tiket'];
 }
 
 // Format nomor booking
@@ -206,8 +249,8 @@ $total_rupiah = 'Rp ' . number_format(
 
 $status = $booking['status_pembayaran'];
 
-    include '../../layout/header.php';?>
-
+include __DIR__ . '/../../layout/header.php';
+?>
 
 <style>
     .payment-page {
@@ -555,4 +598,3 @@ $status = $booking['status_pembayaran'];
     </main>
 
 </div>
-

@@ -1,6 +1,8 @@
+
 <?php
 session_start();
-require_once '../config/config.php';
+
+require_once __DIR__ . '/../config/config.php';
 
 $errors = [];
 
@@ -81,18 +83,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Memeriksa email dan username
     if (empty($errors)) {
 
-        $check = $pdo->prepare(
-            "SELECT user_id FROM users
-             WHERE email = :email OR username = :username"
-        );
+        try {
 
-        $check->execute([
-            'email' => $email,
-            'username' => $username
-        ]);
+            $queryCheck = "
+                SELECT user_id
+                FROM users
+                WHERE email = ? OR username = ?
+                LIMIT 1
+            ";
 
-        if ($check->fetch()) {
-            $errors[] = "Email atau username sudah digunakan.";
+            $check = mysqli_prepare($conn, $queryCheck);
+
+            mysqli_stmt_bind_param(
+                $check,
+                "ss",
+                $email,
+                $username
+            );
+
+            mysqli_stmt_execute($check);
+
+            mysqli_stmt_store_result($check);
+
+            if (mysqli_stmt_num_rows($check) > 0) {
+                $errors[] = "Email atau username sudah digunakan.";
+            }
+
+            mysqli_stmt_close($check);
+
+        } catch (mysqli_sql_exception $e) {
+
+            error_log("Register check error: " . $e->getMessage());
+
+            $errors[] = "Pemeriksaan akun gagal. Silakan coba kembali.";
+
         }
     }
 
@@ -104,48 +128,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             PASSWORD_DEFAULT
         );
 
-        $collectionInterests = json_encode($interests);
+        $collectionInterests = json_encode(
+            $interests,
+            JSON_UNESCAPED_UNICODE
+        );
 
         try {
 
-            $query = "INSERT INTO users (
-                full_name,
-                birthdate,
-                email,
-                gender,
-                preferred_language,
-                collection_interests,
-                username,
-                password
-            ) VALUES (
-                :full_name,
-                :birthdate,
-                :email,
-                :gender,
-                :preferred_language,
-                :collection_interests,
-                :username,
-                :password
-            )";
+            $query = "
+                INSERT INTO users (
+                    full_name,
+                    birthdate,
+                    email,
+                    gender,
+                    preferred_language,
+                    collection_interests,
+                    username,
+                    password
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ";
 
-            $stmt = $pdo->prepare($query);
+            $stmt = mysqli_prepare($conn, $query);
 
-            $stmt->execute([
-                'full_name' => $fullname,
-                'birthdate' => $birthdate,
-                'email' => $email,
-                'gender' => $gender,
-                'preferred_language' => $language,
-                'collection_interests' => $collectionInterests,
-                'username' => $username,
-                'password' => $hashedPassword
-            ]);
+            mysqli_stmt_bind_param(
+                $stmt,
+                "ssssssss",
+                $fullname,
+                $birthdate,
+                $email,
+                $gender,
+                $language,
+                $collectionInterests,
+                $username,
+                $hashedPassword
+            );
+
+            mysqli_stmt_execute($stmt);
+
+            mysqli_stmt_close($stmt);
 
             // Kembali ke halaman login
             header("Location: login.php?registered=1");
             exit;
 
-        } catch (PDOException $e) {
+        } catch (mysqli_sql_exception $e) {
+
+            error_log("Register insert error: " . $e->getMessage());
 
             $errors[] = "Registrasi gagal. Silakan coba kembali.";
 

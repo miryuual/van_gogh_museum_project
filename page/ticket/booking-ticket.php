@@ -1,3 +1,4 @@
+
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -5,29 +6,44 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Pastikan pengunjung sudah login
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login.php");
+    header("Location: ../../auth/login.php");
     exit;
 }
 
 // Koneksi database
-require_once '../../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 
 // Mengambil data akun pengunjung yang sedang login
-$user_id = $_SESSION["user_id"];
+$user_id = (int) $_SESSION["user_id"];
 
-$query = "SELECT full_name, email FROM users WHERE user_id = :user_id";
-$stmt = $pdo->prepare($query);
-$stmt->execute(['user_id' => $user_id]);
-$user = $stmt->fetch();
+$query = "SELECT full_name, email FROM users WHERE user_id = ? LIMIT 1";
+$stmt = mysqli_prepare($conn, $query);
+
+mysqli_stmt_bind_param($stmt, "i", $user_id);
+mysqli_stmt_execute($stmt);
+
+mysqli_stmt_bind_result($stmt, $full_name, $email);
+
+if (mysqli_stmt_fetch($stmt)) {
+    $user = [
+        "full_name" => $full_name,
+        "email" => $email
+    ];
+} else {
+    $user = false;
+}
+
+mysqli_stmt_close($stmt);
 
 // Jika akun tidak ditemukan
 if (!$user) {
     session_destroy();
-    header("Location: login.php");
+    header("Location: ../../auth/login.php");
     exit;
 }
 
-    include '../../layout/header.php';?>
+include __DIR__ . '/../../layout/header.php';
+?>
 
 
 <style>
@@ -126,6 +142,7 @@ if (!$user) {
         transition: background-color 0.2s;
         text-decoration: none;
     }
+
     /* INPUT, SELECT, AND TEXTAREA */
     .booking input:not([type="checkbox"]),
     .booking select {
@@ -202,12 +219,10 @@ if (!$user) {
 <!-- MAIN BODY -->
 
 <!-- NAVIGASI -->
-      <?php include '../../layout/navigasi.php';?>
+<?php include '../../layout/navigasi.php'; ?>
 
 <!-- MAIN CONTENT -->
 <main>
-
-    
 
     <div class="booking">
 
@@ -407,4 +422,4 @@ if (!$user) {
 </div>
 
 <!-- FOOTER -->
-     <?php include '../../layout/footer.php';?>
+<?php include '../../layout/footer.php'; ?>

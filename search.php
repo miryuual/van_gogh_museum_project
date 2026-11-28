@@ -1,64 +1,109 @@
-<?php
-require_once 'config/config.php';
-include 'layout/header.php';
 
-// Mengambil kata kunci pencarian
+<?php
+require_once __DIR__ . '/config/config.php';
+
+
+if (!function_exists('app_url')) {
+    function app_url($path = '')
+    {
+        $documentRoot = realpath($_SERVER['DOCUMENT_ROOT'] ?? '');
+        $projectRoot = realpath(__DIR__);
+
+        $basePath = '';
+
+        if ($documentRoot !== false && $projectRoot !== false) {
+            $documentRoot = str_replace('\\', '/', $documentRoot);
+            $projectRoot = str_replace('\\', '/', $projectRoot);
+
+            $documentRoot = rtrim($documentRoot, '/');
+
+            if (stripos($projectRoot, $documentRoot) === 0) {
+                $basePath = '/' . trim(
+                    substr($projectRoot, strlen($documentRoot)),
+                    '/'
+                );
+            }
+        }
+
+        $path = ltrim((string) $path, '/');
+
+        return $basePath . ($path !== '' ? '/' . $path : '/');
+    }
+}
+
+
+// Memuat header setelah fungsi app_url tersedia.
+include __DIR__ . '/layout/header.php';
+
+
+// ==================================================
+// MENGAMBIL KATA KUNCI PENCARIAN
+// ==================================================
+
 $keyword = trim($_GET['search'] ?? '');
 
 $hasil = [];
 
-// Daftar halaman statis website
+
+// ==================================================
+// DAFTAR HALAMAN STATIS WEBSITE
+// ==================================================
+
 $halaman = [
     [
         'judul' => 'Home',
         'deskripsi' => 'Welcome to Van Gogh Museum. Explore the museum and discover the artworks of Vincent van Gogh.',
-        'url' => 'index.php',
+        'url' => app_url('index.php'),
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'Biography',
         'deskripsi' => 'Discover the life, background, journey, and artistic development of Vincent van Gogh.',
-        'url' => 'page/museum/biography.php',
+        'url' => app_url('page/museum/biography.php'),
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'koleksi',
         'deskripsi' => 'Explore paintings, drawings, prints, and letters by Vincent van Gogh.',
-        'url' => 'page/koleksi/koleksi.php',
+        'url' => app_url('page/koleksi/koleksi.php'),
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'News',
         'deskripsi' => 'Read the latest news and announcements from Van Gogh Museum.',
-        'url' => 'page//news/news.php',
+        'url' => app_url('page/news/news.php'),
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'About Us',
         'deskripsi' => 'Learn about the museum history, collection, research, and museum building.',
-        'url' => 'page/museum/about-us.php',
+        'url' => app_url('page/museum/about-us.php'),
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'Privacy Policy',
         'deskripsi' => 'Information about privacy policy and visitor data.',
-        'url' => 'page/museum/privacy-policy.php',
+        'url' => app_url('page/museum/privacy-policy.php'),
         'kategori' => 'Website Page'
     ],
     [
         'judul' => 'Ticket and Ticket Prices',
         'deskripsi' => 'Find information about museum tickets and admission prices.',
-        'url' => 'page/ticket/ticket-price.php',
+        'url' => app_url('page/ticket/ticket-price.php'),
         'kategori' => 'Website Page'
     ]
 ];
 
-// Menjalankan pencarian
+
+// ==================================================
+// MENJALANKAN PENCARIAN
+// ==================================================
+
 if ($keyword !== '') {
 
-    // 1. Pencarian halaman statis
-    foreach ($halaman as $page) {
+    // 1. PENCARIAN HALAMAN STATIS
 
+    foreach ($halaman as $page) {
         if (
             stripos($page['judul'], $keyword) !== false ||
             stripos($page['deskripsi'], $keyword) !== false
@@ -70,363 +115,435 @@ if ($keyword !== '') {
     // Kata kunci untuk pencarian database
     $searchKeyword = '%' . $keyword . '%';
 
-    // 2. Pencarian data koleksi
+
+    // ==================================================
+    // 2. PENCARIAN DATA KOLEKSI
+    // ==================================================
+
     $sqlKoleksi = "
         SELECT
             id_koleksi AS id,
             judul_koleksi AS judul,
             deskripsi AS deskripsi,
             'Collection' AS kategori,
-            CONCAT('page/koleksi/detail_koleksi.php?id=', id_koleksi) AS url
+            CONCAT(
+                'page/koleksi/detail_koleksi.php?id=',
+                id_koleksi
+            ) AS url
         FROM koleksi
-        WHERE judul_koleksi LIKE :judul
-           OR seniman LIKE :artis
-           OR deskripsi LIKE :deskripsi
+        WHERE judul_koleksi LIKE ?
+           OR seniman LIKE ?
+           OR deskripsi LIKE ?
     ";
 
-    $stmtKoleksi = $pdo->prepare($sqlKoleksi);
-    $stmtKoleksi->execute([
-        ':judul' => $searchKeyword,
-        ':artis' => $searchKeyword,
-        ':deskripsi' => $searchKeyword
-    ]);
+    $stmtKoleksi = mysqli_prepare($conn, $sqlKoleksi);
 
-    $dataKoleksi = $stmtKoleksi->fetchAll();
+    mysqli_stmt_bind_param(
+        $stmtKoleksi,
+        'sss',
+        $searchKeyword,
+        $searchKeyword,
+        $searchKeyword
+    );
 
-    foreach ($dataKoleksi as $item) {
+    mysqli_stmt_execute($stmtKoleksi);
+
+    $resultKoleksi = mysqli_stmt_get_result($stmtKoleksi);
+
+    while ($item = mysqli_fetch_assoc($resultKoleksi)) {
+        $item['url'] = app_url($item['url']);
         $hasil[] = $item;
     }
 
-    // 3. Pencarian data berita
+    mysqli_stmt_close($stmtKoleksi);
+
+
+    // ==================================================
+    // 3. PENCARIAN DATA BERITA
+    // ==================================================
+
     $sqlBerita = "
-    SELECT
-        id_berita AS id,
-        judul_berita AS judul,
-        isi_berita_1 AS deskripsi,
-        'News' AS kategori,
-        CONCAT('detail-berita.php?id=', id_berita) AS url
-    FROM berita
-    WHERE judul_berita LIKE :judul
-       OR isi_berita_1 LIKE :isi
-";
+        SELECT
+            id_berita AS id,
+            judul_berita AS judul,
+            isi_berita_1 AS deskripsi,
+            'News' AS kategori,
+            CONCAT(
+                'page/news/news-details.php?id=',
+                id_berita
+            ) AS url
+        FROM berita
+        WHERE judul_berita LIKE ?
+           OR isi_berita_1 LIKE ?
+    ";
 
-$stmtBerita = $pdo->prepare($sqlBerita);
-$stmtBerita->execute([
-    ':judul' => $searchKeyword,
-    ':isi' => $searchKeyword
-]);
+    $stmtBerita = mysqli_prepare($conn, $sqlBerita);
 
-$dataBerita = $stmtBerita->fetchAll();
+    mysqli_stmt_bind_param(
+        $stmtBerita,
+        'ss',
+        $searchKeyword,
+        $searchKeyword
+    );
+
+    mysqli_stmt_execute($stmtBerita);
+
+    $resultBerita = mysqli_stmt_get_result($stmtBerita);
+
+    while ($item = mysqli_fetch_assoc($resultBerita)) {
+        $item['url'] = app_url($item['url']);
+        $hasil[] = $item;
+    }
+
+    mysqli_stmt_close($stmtBerita);
 }
 ?>
-      <style>
+
+
+<style>
+    .search-main {
+        flex: 1;
+        min-width: 0;
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 40px;
+        box-sizing: border-box;
+    }
+
+    /* Heading */
+
+    .search-heading {
+        padding-bottom: 25px;
+        border-bottom: 1px solid #eeeeee;
+    }
+
+    .search-eyebrow {
+        display: inline-block;
+        color: #a28a00;
+        background: #fff8c9;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+    }
+
+    .search-heading h2 {
+        color: #252525;
+        font-size: 30px;
+        margin: 15px 0 8px;
+        font-weight: 700;
+    }
+
+    .search-heading p {
+        color: #777777;
+        font-size: 14px;
+        margin: 0;
+        font-weight: 400;
+        line-height: 1.6;
+    }
+
+    /* Search Summary */
+
+    .search-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin: 28px 0 20px;
+        flex-wrap: wrap;
+    }
+
+    .search-summary > div > span {
+        display: block;
+        color: #000000;
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .search-summary h3 {
+        margin: 5px 0 0;
+        color: #252525;
+        font-size: 19px;
+        overflow-wrap: anywhere;
+    }
+
+    .result-count {
+        background: #000000;
+        color: #ffffff;
+        padding: 8px 13px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Search Result Cards */
+
+    .search-results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .search-result {
+        position: relative;
+        background: #ffffff;
+        border: 1px solid #000000;
+        border-radius: 3px;
+        padding: 22px 24px;
+        transition: 0.25s ease;
+    }
+
+    .search-result:hover {
+        border-color: #e5c72e;
+        background: #ffd900;
+        transform: translateY(-2px);
+    }
+
+    .result-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .result-category {
+        display: inline-block;
+        color: #ffcc00;
+        background: #000000;
+        padding: 5px 11px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .result-arrow {
+        color: #aaaaaa;
+        font-size: 19px;
+    }
+
+    .search-result h3 {
+        color: #292929;
+        font-size: 19px;
+        margin: 15px 0 8px;
+    }
+
+    .search-result p {
+        color: #4e4d4d;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.7;
+        margin: 0 0 15px;
+    }
+
+    .result-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        color: #000000;
+        font-size: 13px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .result-link:hover {
+        color: #000000;
+        gap: 13px;
+    }
+
+    .result-link span {
+        font-size: 17px;
+    }
+
+    /* Empty Search State */
+
+    .search-empty {
+        text-align: center;
+        padding: 65px 20px;
+        margin-top: 25px;
+        background: #fafafa;
+        border: 1px dashed #dddddd;
+        border-radius: 10px;
+    }
+
+    .search-empty-icon {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        background: #fff3b0;
+        color: #927700;
+        font-size: 35px;
+    }
+
+    .search-empty h3 {
+        color: #333333;
+        font-size: 19px;
+        margin: 0 0 9px;
+    }
+
+    .search-empty p {
+        color: #777777;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.7;
+        margin: 0 0 8px;
+    }
+
+    .search-empty > span {
+        color: #999999;
+        font-size: 12px;
+    }
+
+    /* Responsive */
+
+    @media (max-width: 768px) {
+
         .search-main {
-            flex: 1;
-            min-width: 0;
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 40px;
-            box-sizing: border-box;
-        }
-
-        /* Heading */
-
-        .search-heading {
-            padding-bottom: 25px;
-            border-bottom: 1px solid #eeeeee;
-        }
-
-        .search-eyebrow {
-            display: inline-block;
-            color: #a28a00;
-            background: #fff8c9;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 1.2px;
+            padding: 25px 18px;
         }
 
         .search-heading h2 {
-            color: #252525;
-            font-size: 30px;
-            margin: 15px 0 8px;
-            font-weight: 700;
+            font-size: 25px;
         }
-
-        .search-heading p {
-            color: #777777;
-            font-size: 14px;
-            margin: 0;
-            font-weight: 400;
-            line-height: 1.6;
-        }
-
-        /* Search Summary */
 
         .search-summary {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin: 28px 0 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-summary > div > span {
-            display: block;
-            color: #000000;
-            font-size: 30px;
-            font-weight: 800;
-        }
-
-        .search-summary h3 {
-            margin: 5px 0 0;
-            color: #252525;
-            font-size: 19px;
-            overflow-wrap: anywhere;
-        }
-
-        .result-count {
-            background: #000000;
-            color: #ffffff;
-            padding: 8px 13px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* Search Result Cards */
-
-        .search-results-list {
-            display: flex;
+            align-items: flex-start;
             flex-direction: column;
-            gap: 15px;
         }
 
         .search-result {
-            position: relative;
-            background: #ffffff;
-            border: 1px solid #000000;
-            border-radius: 3px;
-            padding: 22px 24px;
-            transition: 0.25s ease;
+            padding: 18px;
         }
+    }
+</style>
 
-        .search-result:hover {
-            border-color: #e5c72e;
-            background: #ffd900;
-            transform: translateY(-2px);
-        }
 
-        .result-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+<!-- Navigasi -->
+<?php include __DIR__ . '/layout/navigasi.php'; ?>
 
-        .result-category {
-            display: inline-block;
-            color: #ffcc00;
-            background: #000000;
-            padding: 5px 11px;
-            border-radius: 5px;
-            font-size: 11px;
-            font-weight: 700;
-        }
 
-        .result-arrow {
-            color: #aaaaaa;
-            font-size: 19px;
-        }
+<!-- MAIN BODY -->
 
-        .search-result h3 {
-            color: #292929;
-            font-size: 19px;
-            margin: 15px 0 8px;
-        }
+<!-- Main Content -->
+<main class="search-main">
 
-        .search-result p {
-            color: #4e4d4d;
-            font-size: 13px;
-            font-weight: 400;
-            line-height: 1.7;
-            margin: 0 0 15px;
-        }
+    <?php if ($keyword === ''): ?>
 
-        .result-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 9px;
-            color: #000000;
-            font-size: 13px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: 0.2s ease;
-        }
+        <div class="search-empty">
+            <div class="search-empty-icon">⌕</div>
+            <h3>Start Your Search</h3>
+            <p>Enter a keyword to discover more about Van Gogh Museum.</p>
+        </div>
 
-        .result-link:hover {
-            color: #000000;
-            gap: 13px;
-        }
+    <?php else: ?>
 
-        .result-link span {
-            font-size: 17px;
-        }
+        <div class="search-summary">
+            <div>
+                <span>Search results for</span>
 
-        /* Empty Search State */
+                <h3>
+                    "<?= htmlspecialchars(
+                        $keyword,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ); ?>"
+                </h3>
+            </div>
 
-        .search-empty {
-            text-align: center;
-            padding: 65px 20px;
-            margin-top: 25px;
-            background: #fafafa;
-            border: 1px dashed #dddddd;
-            border-radius: 10px;
-        }
+            <span class="result-count">
+                <?= count($hasil); ?> result(s) found
+            </span>
+        </div>
 
-        .search-empty-icon {
-            width: 60px;
-            height: 60px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 18px;
-            border-radius: 50%;
-            background: #fff3b0;
-            color: #927700;
-            font-size: 35px;
-        }
+        <?php if (!empty($hasil)): ?>
 
-        .search-empty h3 {
-            color: #333333;
-            font-size: 19px;
-            margin: 0 0 9px;
-        }
+            <div class="search-results-list">
 
-        .search-empty p {
-            color: #777777;
-            font-size: 13px;
-            font-weight: 400;
-            line-height: 1.7;
-            margin: 0 0 8px;
-        }
+                <?php foreach ($hasil as $item): ?>
 
-        .search-empty > span {
-            color: #999999;
-            font-size: 12px;
-        }
+                    <article class="search-result">
 
-        /* Responsive */
+                        <div class="result-top">
 
-        @media (max-width: 768px) {
+                            <span class="result-category">
+                                <?= htmlspecialchars(
+                                    $item['kategori'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ); ?>
+                            </span>
 
-            .search-main {
-                padding: 25px 18px;
-            }
+                            <span class="result-arrow">↗</span>
 
-            .search-heading h2 {
-                font-size: 25px;
-            }
+                        </div>
 
-            .search-summary {
-                align-items: flex-start;
-                flex-direction: column;
-            }
+                        <h3>
+                            <?= htmlspecialchars(
+                                $item['judul'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>
+                        </h3>
 
-            .search-result {
-                padding: 18px;
-            }
-        }
-    </style>
-
-    
-    <!--Navigasi-->
-      <?php include 'layout/navigasi.php'; ?>
-
-    <!--MAIN BODY-->
-
-    <!--main content-->
-        <main class="search-main">
-
-            <?php if ($keyword === ''): ?>
-
-                <div class="search-empty">
-                    <div class="search-empty-icon">⌕</div>
-                    <h3>Start Your Search</h3>
-                    <p>Enter a keyword to discover more about Van Gogh Museum.</p>
-                </div>
-
-            <?php else: ?>
-
-                <div class="search-summary">
-                    <div>
-                        <span>Search results for</span>
-                        <h3>"<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>"</h3>
-                    </div>
-
-                    <span class="result-count">
-                        <?= count($hasil); ?> result(s) found
-                    </span>
-                </div>
-
-                <?php if (!empty($hasil)): ?>
-
-                    <div class="search-results-list">
-
-                        <?php foreach ($hasil as $item): ?>
-
-                            <article class="search-result">
-
-                                <div class="result-top">
-                                    <span class="result-category">
-                                        <?= htmlspecialchars($item['kategori'], ENT_QUOTES, 'UTF-8'); ?>
-                                    </span>
-
-                                    <span class="result-arrow">↗</span>
-                                </div>
-
-                                <h3>
-                                    <?= htmlspecialchars($item['judul'], ENT_QUOTES, 'UTF-8'); ?>
-                                </h3>
-
-                                <p>
-                                    <?= htmlspecialchars($item['deskripsi'], ENT_QUOTES, 'UTF-8'); ?>
-                                </p>
-
-                                <a
-                                    class="result-link"
-                                    href="<?= htmlspecialchars($item['url'], ENT_QUOTES, 'UTF-8'); ?>"
-                                >
-                                    View Details
-                                    <span>→</span>
-                                </a>
-
-                            </article>
-
-                        <?php endforeach; ?>
-
-                    </div>
-
-                <?php else: ?>
-
-                    <div class="search-empty">
-                        <div class="search-empty-icon">⌕</div>
-                        <h3>No Results Found</h3>
                         <p>
-                            We couldn't find anything matching
-                            "<?= htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8'); ?>".
+                            <?= htmlspecialchars(
+                                $item['deskripsi'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>
                         </p>
-                        <span>Try another keyword or check your spelling.</span>
-                    </div>
 
-                <?php endif; ?>
+                        <a
+                            class="result-link"
+                            href="<?= htmlspecialchars(
+                                $item['url'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ); ?>"
+                        >
+                            View Details
+                            <span>→</span>
+                        </a>
 
-            <?php endif; ?>
+                    </article>
 
-        </main>
-    </div>
+                <?php endforeach; ?>
+
+            </div>
+
+        <?php else: ?>
+
+            <div class="search-empty">
+
+                <div class="search-empty-icon">⌕</div>
+
+                <h3>No Results Found</h3>
+
+                <p>
+                    We couldn't find anything matching
+                    "<?= htmlspecialchars(
+                        $keyword,
+                        ENT_QUOTES,
+                        'UTF-8'
+                    ); ?>".
+                </p>
+
+                <span>Try another keyword or check your spelling.</span>
+
+            </div>
+
+        <?php endif; ?>
+
+    <?php endif; ?>
+
+</main>
+
+</div>
 
 
-<!--FOOTERR-->
-    <?php include 'layout/footer.php'; ?>
+<!-- FOOTER -->
+<?php include __DIR__ . '/layout/footer.php'; ?>
